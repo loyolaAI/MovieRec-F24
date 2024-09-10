@@ -139,4 +139,4 @@ Pull requests are a way for you to merge the things you've been working on with 
 
 ## Thats all!
 
-I think I've covered everything you need to know about working with the code. Once again please email me at njohnson14@luc.edu or DM me through the *LAIC* Slack.
+I think I've covered everything you need to know about working with the code. Some other things you guys will need to learn is installing packages that we will be using, but we can go over that once it becomes an issue. Once again please email me at njohnson14@luc.edu or DM me through the *LAIC* Slack if you have any questions and **GOOD LUCK**.
