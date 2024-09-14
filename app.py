@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import joblib
 
 app = Flask(__name__)
@@ -9,7 +9,7 @@ model = joblib.load('model.pkl')
 
 @app.route('/')
 def home():
-    return "Machine Learning Model API"
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
