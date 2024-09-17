@@ -11,28 +11,42 @@ An HTTP request is a message sent by a client to a server to request a resource.
 ### Common HTTP Methods
 
 1. **GET**: Retrieves data from a server. For example, when you visit a webpage, your browser makes a GET request to retrieve the page’s content.
-   
+
+`
 GET /index.html HTTP/1.1 Host: www.example.com
+`
 
 2. **POST**: Submits data to be processed by a server. Often used when submitting form data or uploading a file.
 
+`
 POST /submit-form HTTP/1.1 Host: www.example.com Content-Type: application/x-www-form-urlencoded
+`
 
+`
 name=JohnDoe&email=john@example.com
+`
 
 3. **PUT**: Updates existing data on the server. It replaces the current representation of the resource with the payload provided.
 
+`
 PUT /update-item/1 HTTP/1.1 Host: www.example.com Content-Type: application/json
+`
 
+`
 { "name": "Updated Item", "price": 19.99 }
+`
 
 4. **DELETE**: Deletes the specified resource from the server.
 
+`
 DELETE /delete-item/1 HTTP/1.1 Host: www.example.com
+`
 
 5. **HEAD**: Similar to GET, but it only retrieves the headers of the resource, not the actual content.
 
+`
 HEAD /index.html HTTP/1.1 Host: www.example.com
+`
 
 ### HTTP Request Structure
 
@@ -46,13 +60,17 @@ Example: `GET /index.html HTTP/1.1`
 
 Example:
 
+`
 Host: www.example.com User-Agent: Mozilla/5.0
+`
 
 3. **Body** (Optional): Contains data sent to the server, such as form data or JSON payload.
 
 Example:
 
+`
 name=JohnDoe&email=john@example.com
+`
 
 ### Making HTTP Requests
 
