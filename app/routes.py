@@ -8,8 +8,6 @@ def init_routes(app):
     def home():
         return render_template("index.html")
 
-    # ENDPOINTS
-
     # Recommendation
     @app.route("/recommend", methods=["POST"])
     def recommend():
@@ -25,6 +23,7 @@ def init_routes(app):
         # Throw exception if there is not movie data
         return
 
+    # Search For Movie(s)
     @app.route("/search", methods=["GET"])
     def search():
         # Validity Check
