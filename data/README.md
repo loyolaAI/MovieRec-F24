@@ -1,1 +1,0 @@
-This dataset might not be good depending on the model were using. We can also use the IMDB API for fething movie data. Here is a [link](https://www.kaggle.com/datasets/grouplens/movielens-20m-dataset/code) to places we can start playing with the dataset.
