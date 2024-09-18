@@ -4,6 +4,6 @@ import joblib
 model = joblib.load("model.pkl")
 
 
-def movie_recommendation(data):  # Adjust
+def movie_recommendation(data):
     return model.recommend([data])
 
