@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import 'node_modules/modern-normalize/modern-normalize.css';
+
+/* ============ CSS RESETS ============ */
+
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+/* Prevent font size inflation */
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+/* Remove default margin in favour of better control in authored CSS */
+body, h1, h2, h3, h4, p,
+figure, blockquote, dl, dd {
+  margin-block-end: 0;
+}
+/* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+}
+/* Set core body defaults */
+body {
+  min-height: 100vh;
+  line-height: 1.5;
+}
+/* Set shorter line heights on headings and interactive elements */
+h1, h2, h3, h4,
+button, input, label {
+  line-height: 1.1;
+}
+/* Balance text wrapping on headings */
+h1, h2,
+h3, h4 {
+  text-wrap: balance;
+}
+/* Make images easier to work with */
+img,
+picture {
+  max-width: 100%;
+  display: block;
+}
+/* Inherit fonts for inputs and buttons */
+input, button,
+textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+/* Make sure textareas without a rows attribute are not tiny */
+textarea:not([rows]) {
+  min-height: 10em;
+}
+/* Anything that has been anchored to should have extra scroll margin */
+:target {
+  scroll-margin-block: 5ex;
+}
+:root {
+  --primary: #448FFF;
+}
+
+/* ============ CSS RESETS ============ */
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f1f1f1;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+
+/* ============ FONT STYLES ============ */
+.space-mono-regular {
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.space-mono-bold {
+  font-family: "Space Mono", monospace;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.space-mono-regular-italic {
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.space-mono-bold-italic {
+  font-family: "Space Mono", monospace;
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* ============ FONT STYLES ============ */
+
+
+
+/* ============ GLOBAL STYLES ============ */
+
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  box-shadow: 0 10px 20px -20px gray; 
+  background-color: white;
+}
+
+header > h1 {
+  margin: 0;
+  border-radius: 8px;
+  padding: 4px;
+  border: 2px solid var(--primary);
+  line-height: 36px;
+  font-size: 36px;
+  user-select: none;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+
+  & > img {
+    height: 36px;
+    width: 36px;
+  }
+
+  & > a {
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--primary);
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+}
+
+main {
+  flex: 1;
+  padding: 2rem;
+  position: relative;
+
+  &::before {
+    position: absolute;
+    content: '';
+    top: 0;
+    left: 0;
+
+    height: 100%;
+    width: 512px;
+    background: linear-gradient(to right, #f1f1f1 0%, #f1f1f1 50%, rgba(241, 241, 241, 0) 100%);
+  }
+
+  &::after {
+    position: absolute;
+    content: '';
+    top: 0;
+    right: 0;
+
+    height: 100%;
+    width: 512px;
+    background: linear-gradient(to left, #f1f1f1 0%, #f1f1f1 50%, rgba(241, 241, 241, 0) 100%);;
+  }
+}
+
+/* ============ GLOBAL STYLES ============ */
+
