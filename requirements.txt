@@ -1,31 +1,25 @@
-altgraph @ file:///AppleInternal/Library/BuildRoots/860631e9-c1c5-11ee-98ee-b6ef2fd8d87b/Library/Caches/com.apple.xbs/Sources/python3/altgraph-0.17.2-py2.py3-none-any.whl
+aniso8601==9.0.1
 blinker==1.8.2
-certifi==2024.6.2
-charset-normalizer==3.3.2
 click==8.1.7
+colorama==0.4.6
 Flask==3.0.3
 Flask-Cors==5.0.0
-future @ file:///AppleInternal/Library/BuildRoots/860631e9-c1c5-11ee-98ee-b6ef2fd8d87b/Library/Caches/com.apple.xbs/Sources/python3/future-0.18.2-py3-none-any.whl
-gunicorn==23.0.0
-idna==3.7
-importlib_metadata==8.5.0
+Flask-RESTful==0.3.10
+Flask-SQLAlchemy==3.1.1
+greenlet==3.1.0
 itsdangerous==2.2.0
 Jinja2==3.1.4
-joblib==1.4.2
-macholib @ file:///AppleInternal/Library/BuildRoots/860631e9-c1c5-11ee-98ee-b6ef2fd8d87b/Library/Caches/com.apple.xbs/Sources/python3/macholib-1.15.2-py2.py3-none-any.whl
 MarkupSafe==2.1.5
+pytz==2024.2
+six==1.16.0
+SQLAlchemy==2.0.35
+typing_extensions==4.12.2
+Werkzeug==3.0.4
+joblib==1.4.2
 numpy==2.0.2
-packaging==24.1
 pandas==2.2.2
-pydexcom==0.3.2
-python-dateutil==2.9.0.post0
-pytz==2024.1
-requests==2.32.3
 scikit-learn==1.5.2
-scipy==1.13.1
-six @ file:///AppleInternal/Library/BuildRoots/860631e9-c1c5-11ee-98ee-b6ef2fd8d87b/Library/Caches/com.apple.xbs/Sources/python3/six-1.15.0-py2.py3-none-any.whl
+scipy==1.14.1
+python-dateutil==2.9.0.post0
 threadpoolctl==3.5.0
 tzdata==2024.1
-urllib3==2.2.2
-Werkzeug==3.0.4
-zipp==3.20.2
