@@ -13,7 +13,7 @@
   <header>
     <h1>
       <img alt="logo" src="{{url_for('static', filename='logo.png')}}"/>
-      <a href="index.html">AI Club</a>
+      <a href="/">AI Club</a>
     </h1>
 
     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user-round">
@@ -25,36 +25,72 @@
   <main>
     <h1 style="font-size: xx-large; margin-top: 0; text-decoration: underline; text-align: center;">Movie Recommendations</h1>
 
+    <section style="display: flex; gap: 1rem; max-width: 1400px; margin: 4rem auto; justify-content: space-evenly;">
+      {% for movie in data[:3] %}
+        <div class="card-container">
+          <img src="{{ url_for('static', filename='placeholder.svg') }}"/>
+          <div class="shade"></div>
 
+          <h3>{{ movie['title'] }}</h3>
+          
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#FFC700" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span style="font-weight: 700;">{{ movie['generalRating'] }}</span>
+          </div>
+
+          <div style="margin-top: 1rem; display: flex; justify-content: space-evenly" id="movies-container-{{ movie['id'] }}"></div>
+        </div>
+      {% endfor %}
+    </section>
   </main>
-  
-  
-  <!-- <script>
-    async function makePrediction() {
-    const input = document.getElementById('inputData').value;
-    const inputData = input.split(',').map(Number);  // Convert input to an array of numbers
-    
-    try {
-    const response = await fetch('/predict', {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ input: inputData })
-    });
-    
-    if (!response.ok) {
-    console.error('Error with request:', response.statusText);
-    return;
+  <script>
+    const renderMovies = () => {
+      for (let i = 0; i < 3; i++) {
+        const movie = globalThis.movies[i];
+        let cardInnerHTML = '';
+
+        for (let j = 1; j <= 5; j++) {
+          cardInnerHTML += `
+            <button class="hover-button" id="button-${movie.id}-${j}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" rating="${j}" id="svg-${movie.id}-${j}" fill="${movie.personalRating >= j ? '#FFC700' : 'transparent'}" stroke="#FFC700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hover-star ${movie.id}">
+                <polygon id="polygon-${movie.id}-${j}" points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </button>
+          `
+        }
+
+        document.getElementById(`movies-container-${movie.id}`).innerHTML = cardInnerHTML;
+        document.querySelectorAll('button.hover-button').forEach((button) => {
+          button.addEventListener('click', callSetRating);
+          button.addEventListener('touchstart', callSetRating);
+        });
+      }
     }
-    
-    const result = await response.json();
-    document.getElementById('predictionResult').innerText = result.prediction;
-    } catch (error) {
-    console.error('Error:', error);
+
+
+    (async () => {
+      globalThis.movies = await fetch('/get-movies').then(res => res.json()).then(data => data);
+      renderMovies();
+    })()
+
+    const callSetRating = async (event) => {
+      const id = event.target.id.split('-')[1]-1
+      const rating = event.target.id.split('-')[2]
+
+      globalThis.movies = await fetch('/set-rating', {
+        method: 'POST',
+        headers: {
+          "content-type": 'application/json'
+        },
+        body: JSON.stringify({
+          id, rating
+        })
+      }).then(res => res.json());
+
+      renderMovies();
     }
-    }
-  </script> -->
-  
+  </script>
 </body>
 </html>
