@@ -16,3 +16,16 @@ print()
 print(df.info)
 print()
 print(df.shape)
+
+# Example of iterating over a dataframe using the .iterrows() method.
+# This method returns the index of the row and the value of the row.
+# The value of the row (in this case) containts 3 values, those are
+# 'user_name', 'film_id', and 'rating'. For whatever your CSV holds,
+# That will the the values of your row.
+for index, row in df.iterrows():
+    print(f"index={index} | username = {row['user_name']}")
+    print(f"index={index} | film_id = {row['film_id']}")
+    print(f"index={index} | rating = {row['rating']}")
+    # Break after one interation because I dont want to print forever
+    # Normally would not break
+    break
