@@ -2,7 +2,7 @@
 import pandas as pd
 
 # Load CSV file you found from kaggle and skip corrupted lines (i.e. bad data)
-df = pd.read_csv('ratings.csv.gz', compression='gzip', on_bad_lines='skip')
+df = pd.read_csv("ratings.csv.gz", compression="gzip", on_bad_lines="skip")
 
 ## If the data you have isnt zipped you could do this
 # df = pd.read_csv('ratings.csv', on_bad_lines='skip')
