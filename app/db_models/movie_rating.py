@@ -1,25 +1,18 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import Mapped, mapped_column, relationship  # type: ignore
+from sqlalchemy import ForeignKey  # type: ignore
 
-from app.db_models import user
-from user import User
-
-db = SQLAlchemy()
-
+from app import db
 
 class MovieRating(db.Model):
     __tablename__ = "movie_ratings"
 
     movie_id: Mapped[int] = mapped_column(primary_key=True)
-    id: Mapped[str] = mapped_column(db.ForeignKey("users.cuid"), nullable=False)
     movie_title: Mapped[str] = mapped_column(nullable=False)
     _rating: Mapped[float] = mapped_column(nullable=False)
 
-    user: Mapped[User] = relationship(
-        "User", back_populates="ratings"
-    )  # Connects the relationshiop back to the User Model
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user: Mapped["User"] = relationship(back_populates="ratings") # type: ignore
 
-    # Limits rating to 0 - 5
     @property
     def rating(self):
         return self._rating

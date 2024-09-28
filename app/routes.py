@@ -3,11 +3,11 @@ from flask import request, jsonify, render_template
 from app.functions.movie_recommender import movie_recommendation
 from app.mockdata import data
 
-
 def init_routes(app):
     @app.route("/")
     def home():
         return render_template("index.html", data=data)
+
 
     @app.route("/get-movies", methods=["GET"])
     def getMovies():
