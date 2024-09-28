@@ -1,6 +1,6 @@
-from flask import Flask # type: ignore
-from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass # type: ignore
-from flask_sqlalchemy import SQLAlchemy # type: ignore
+from flask import Flask  # type: ignore
+from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass  # type: ignore
+from flask_sqlalchemy import SQLAlchemy  # type: ignore
 
 from app.routes import init_routes
 from app.exceptions import init_exception_handler
@@ -9,7 +9,9 @@ from app.exceptions import init_exception_handler
 class Base(DeclarativeBase, MappedAsDataclass):
     pass
 
+
 db = SQLAlchemy(model_class=Base)
+
 
 def create_app():
     app = Flask(__name__)
@@ -21,11 +23,10 @@ def create_app():
 
     from app.db_models.user import User
     from app.db_models.movie_rating import MovieRating
-    
+
     with app.app_context():
         # db.drop_all()
         db.create_all()
-
 
         # ------------------------------------------  EXAMPLE OPERATIONS  ------------------------------------------
         # test_user = User(id="testID", username="test", email="test@test.test", password="testtest", ratings=[], profile_image_id="", profile_image_url="", letterbox_username="")
@@ -34,7 +35,7 @@ def create_app():
 
         # user = User.query.get("testID")
         # test_rating = MovieRating(movie_title="Movie1", movie_id=2, _rating=4, user_id=user.id, user=user)
-        
+
         # db.session.add(test_rating)
         # db.session.commit()
         # print(User.query.all())
