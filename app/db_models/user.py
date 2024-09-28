@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship  # type: ignore
+import sqlalchemy as s  # type: ignore 
 
 from app import db
 
@@ -14,4 +15,4 @@ class User(db.Model):
     profile_image_url: Mapped[str] = mapped_column(nullable=True)
 
     letterbox_username: Mapped[str] = mapped_column(unique=True)
-    ratings: Mapped[list["MovieRating"]] = relationship(back_populates="user") # type: ignore
+    ratings: Mapped[list["MovieRating"]] = relationship("MovieRating", back_populates="user") # type: ignore

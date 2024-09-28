@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship  # type: ignore
+from sqlalchemy.orm import Mapped, validates, mapped_column, relationship  # type: ignore
 from sqlalchemy import ForeignKey  # type: ignore
 
 from app import db
@@ -11,14 +11,10 @@ class MovieRating(db.Model):
     _rating: Mapped[float] = mapped_column(nullable=False)
 
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
-    user: Mapped["User"] = relationship(back_populates="ratings") # type: ignore
+    user: Mapped["User"] = relationship("User", backref="", back_populates="ratings") # type: ignore
 
-    @property
-    def rating(self):
-        return self._rating
-
-    @rating.setter
-    def rating(self, value):
+    @validates('_rating')
+    def validate_rating(self, key, value):
         if not (0 <= value <= 5):
             raise ValueError("Rating must be between 0 and 5.")
-        self._rating = value
+        return value
