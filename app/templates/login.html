@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="auth-page-container">
+<div class="auth-page-container" style="gap: 0.5rem;">
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+      <div class="notification is-danger">
+          Error: {{ messages[0] }}
+      </div>
+  {% endif %}
+  {% endwith %}
   <form class="auth-card" method="POST" action="/login">
     <span style="font-size: large; font-weight: bold; ">LAIC Movie Recommendation Login</span>
 
@@ -34,6 +41,11 @@
       <input type="checkbox" id="remember" name="remember">
       Remember Me
     </label>
+
+    <div style="display: grid;">
+      <a tabindex="-1" href="/reset-password">Forgot Your Password?</a>
+      <a tabindex="-1" href="/signup">Don't have an account? Sign Up</a>
+    </div>
 
     <Button>Login</Button>
   </form>

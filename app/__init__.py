@@ -1,7 +1,7 @@
 from flask import Flask  # type: ignore
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass  # type: ignore
 from flask_sqlalchemy import SQLAlchemy  # type: ignore
-from flask_login import LoginManager
+from flask_login import LoginManager  # type: ignore
 
 from app.exceptions import init_exception_handler
 
@@ -26,6 +26,7 @@ def create_app():
 
     from app.db_models.user import User
     from app.db_models.movie_rating import MovieRating
+    from app.db_models.password_reset_token import PasswordResetToken
 
     login_manager = LoginManager()
     login_manager.login_view = "login"
