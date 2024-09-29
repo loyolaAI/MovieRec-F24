@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship  # type: ignore
 import sqlalchemy as s  # type: ignore
+from flask_login import UserMixin
 
 from app import db
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "users"
 
     id: Mapped[str] = mapped_column(primary_key=True)
@@ -15,5 +16,8 @@ class User(db.Model):
     profile_image_id: Mapped[str] = mapped_column(nullable=True)
     profile_image_url: Mapped[str] = mapped_column(nullable=True)
 
-    letterbox_username: Mapped[str] = mapped_column(unique=True)
+    letterboxd_username: Mapped[str] = mapped_column(unique=True)
     ratings: Mapped[list["MovieRating"]] = relationship("MovieRating", back_populates="user")  # type: ignore
+
+    def get_id(self):
+        return self.id

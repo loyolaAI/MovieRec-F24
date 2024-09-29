@@ -26,3 +26,5 @@ tzdata==2024.1
 psycopg2-binary==2.9.9
 flask_migrate==4.0.7
 flask_sqlalchemy==3.1.1
+flask_login==0.6.3
+cuid2==2.0.1
