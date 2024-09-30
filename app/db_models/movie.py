@@ -7,6 +7,7 @@ from director import Director
 
 db = SQLAlchemy()
 
+
 class Movie(db.Model):
     __tablename__ = "movies"
 
@@ -18,11 +19,6 @@ class Movie(db.Model):
     poster_image_id: Mapped[str] = mapped_column(nullable=True)
     poster_image_url: Mapped[str] = mapped_column(nullable=True)
 
-    actors: Mapped[list["Actor"]] = relationship(
-        "Actor", back_populates="movies"
-    ) 
-    # List just incase a movie has more than one director 
-    directors: Mapped[list["Director"]] = relationship(
-        "Director", back_populates="movies"
-    ) 
-
+    actors: Mapped[list["Actor"]] = relationship("Actor", back_populates="movies")
+    # List just incase a movie has more than one director
+    directors: Mapped[list["Director"]] = relationship("Director", back_populates="movies")
