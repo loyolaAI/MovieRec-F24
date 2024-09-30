@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% with auth = current_user %}
+<section class="container">
+  <h1 style="width: 100%; max-width: 754px; margin: 0 auto;">Profile</h1>
+  <form class="auth-card" style="max-width: 754px; width: 100%; margin-top: 1rem;" autocomplete="off" method="POST" action="/profile" enctype="multipart/form-data">
+    <span style="font-size: large; font-weight: bold;">LAIC MovieRec Profile</span>
+    
+    <div class="profile-form-container" style="max-width: 400px;">
+      <div>
+        <label for="pfp" class="img-upload">
+          <input type="file" id="pfp" name="pfp" accept="image/*" style="width: 256px; height: 256px; z-index: 3; opacity: 0; cursor: pointer;" disabled>
+          {% if auth['profile_image_url'] is none %}
+            <img
+              src=""
+              style="font-size: 128px; text-align: center;"
+              alt='{% for i in range(("Joel Gutierrez").split(" ")|length)[:2] %}{{("Joel Gutierrez").split(" ")[i][0]}}{% endfor %}'
+            >
+          {% else %}
+            <img
+            src="{{ auth['profile_image_url'] }}"
+            style="font-size: 128px; text-align: center;"
+            alt='{% for i in range(("Joel Gutierrez").split(" ")|length)[:2] %}{{ ("Joel Gutierrez").split(" ")[i][0] }}{% endfor %}'
+            >
+          {% endif %}
+          <div class="upload-overlay">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 13v8"/>
+              <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+              <path d="m8 17 4-4 4 4"/>
+            </svg>
+  
+            <p>Upload</p>
+          </div>
+        </label>
+        {% if auth['profile_image_url'] is not none %}
+          <button style="width: 100%; background-color: var(--destructive);" type="button">Delete Image</button>
+        {% endif %}
+      </div>
+      
+      <div class="profile-form">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 2rem;">
+          <!-- CANCEL EDITS BUTTON -->
+          <button class="edit-profile cancel" type="button" disabled onclick="cancelEdits()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="m15 9-6 6"/>
+              <path d="m9 9 6 6"/>
+            </svg>
+          </button>
+
+          <!-- EDIT BUTTON -->
+          <button class="edit-profile" type="button" data-editing="true" onclick="handleToggleEdit()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+              <path d="m15 5 4 4"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="input-container">
+          <label for="email">Email <span>*</span></label>
+          <input type="email" id="email" name="email" autocomplete="email" disabled value="{{ auth.email }}" placeholder="Please Enter Your Email" style="border-bottom: 1px solid transparent;">
+        </div>
+        
+        <div class="input-container">
+          <label for="username">Username <span>*</span></label>
+          <input type="text" id="username" name="username" autocomplete="username" disabled value="{{ auth.username }}" placeholder="Please Enter Your Username" style="border-bottom: 1px solid transparent;">
+        </div>
+    
+        <div class="input-container">
+          <label for="letterboxd">Letterboxd Username <span>*</span></label>
+          <input type="text" id="letterboxd" name="letterboxd" autocomplete="username" disabled value="{{ auth.letterboxd_username }}" placeholder="Please Enter Your Letterboxd Username" style="border-bottom: 1px solid transparent;">
+        </div>
+
+        <button class="save-changes" style="margin-top: auto" type="submit">Save Changes</button>
+      </div>
+    </div>
+
+  </form>
+</section>
+<script>
+  const data = {
+    email: '{{ auth.email }}',
+    username: '{{ auth.username }}',
+    letterboxd: '{{ auth.letterboxd_username }}',
+    profile_image_url: '{{ auth.profile_image_url }}' === "None" ? "" : '{{ auth.profile_image_url }}',
+    profile_image_id: '{{ auth.profile_image_id }}'
+  };
+
+  const pfpPreview = document.querySelector('.img-upload > img');
+  const imageInput = document.querySelector('#pfp');
+
+  function cancelEdits() {
+    document.querySelector('#email').value = data.email;
+    document.querySelector('#username').value = data.username;
+    document.querySelector('#letterboxd').value = data.letterboxd;
+    imageInput.value = '';
+
+    handleToggleEdit();
+  }
+
+  async function handleToggleEdit() {
+    const inputs = document.querySelectorAll('input');
+
+    const editBtn = document.querySelectorAll("button.edit-profile");
+    const isEditing = editBtn[1].dataset.editing === "true";
+    
+    if (editBtn.length > 1) {
+      const isEditing = editBtn[1].dataset.editing === "true";
+      editBtn[1].dataset.editing = !isEditing;
+      editBtn[0].disabled = !isEditing;
+    }
+
+    inputs.forEach((el) => {
+      el.disabled = !isEditing;
+      el.style.borderBottom = isEditing ? '1px solid var(--primary)' : '1px solid transparent';
+    });
+
+    if (imageInput && imageInput.files.length > 0 && isEditing) {
+      pfpPreview.setAttribute('src', await getSrcFromImage(imageInput.files[0]));
+    } else {
+      pfpPreview.setAttribute('src', data.profile_image_url);
+    }
+  }
+
+  function getSrcFromImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  imageInput.addEventListener('change', async (e) => {
+    pfpPreview.setAttribute('src', await getSrcFromImage(e.target.files[0]));
+  });
+</script>
+{% endwith %}
+{% endblock %}

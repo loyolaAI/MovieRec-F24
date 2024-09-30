@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="auth-page-container" style="gap: 0.5rem;">
+<div class="container auth-page-container" style="gap: 0.5rem;">
   {% with messages = get_flashed_messages() %}
   {% if messages %}
       <div class="notification is-danger">
@@ -10,7 +10,7 @@
   {% endif %}
   {% endwith %}
   <form class="auth-card" method="POST" action="/signup">
-    <span style="font-size: large; font-weight: bold; ">LAIC Movie Recommendation Signup</span>
+    <span style="font-size: large; font-weight: bold; ">LAIC MovieRec Signup</span>
     
     <div class="input-container">
       <label for="email">Email <span>*</span></label>
