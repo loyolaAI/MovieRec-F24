@@ -52,9 +52,6 @@ This should be pretty self explanatory. You will need a github account to work w
 
 You will need to create your own fork of this repository, to do that please refer to this [guide](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
 
-## Create a github SSH key
-
-You will need a github SSH key so that you will be able to communicate with the remote repository you just created (your own fork). To do this please refer to this [guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
 ## Create a new branch on github website.
 
@@ -65,7 +62,7 @@ It's considered good practice to work out of a specific branch for specific feat
 
 ## Clone the repository and switch to the new branch.
 
-To clone the repo, make sure you're on your own version of the repo, and click the green `<code>` section in the middle / left of the screen and make sure you click the `ssh` clone option, copy that link.
+To clone the repo, make sure you're on your own version of the repo, and click the green `<code>` section in the middle / left of the screen and make sure you click the `http` clone option, copy that link.
 
 You then need to open up your IDE of terminal and go somewhere you want the repository to be placed. then type
 ```
