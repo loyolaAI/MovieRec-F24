@@ -2,20 +2,16 @@ from flask import request, jsonify, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
 from datetime import datetime
-import os
 
 from app.functions.movie_recommender import movie_recommendation
 from app.mockdata import data
+from app.db_models.user import User
+from app.db_models.password_reset_token import PasswordResetToken as Pass
 
 from app.functions.user_actions import (
-    get_user_by_email,
     create_user,
-    create_reset_token,
-    delete_reset_token,
-    get_reset_token,
     update_password,
     send_password_reset_email,
-    upload_image,
     update_user,
 )
 from app import db
@@ -62,15 +58,22 @@ def init_routes(app):
         email = request.form.get("email")
         username = request.form.get("username")
         letterboxd = request.form.get("letterboxd")
-        image = request.files.get("pfp", "")
+        image = request.files.get("pfp", None)
 
         # Save Image
-        # imgData = upload_image(image, current_user.id)
+        if image:
+            current_user.upload_image(image)
 
         # Update User
         update_user(current_user, username, email, letterboxd)
 
         return redirect(url_for("profile"))
+
+    @app.route("/profile", methods=["DELETE"])
+    @login_required
+    def delete_image():
+        User.get_by_email(current_user.email).delete_image()
+        return jsonify({"Status": 200, "Message": "Image deleted successfully"})
 
     @app.route("/signup")
     def signup():
@@ -84,7 +87,7 @@ def init_routes(app):
         password = request.form.get("password")
 
         # Check if user already exists
-        does_user_exist = get_user_by_email(email)
+        does_user_exist = email
         if does_user_exist:
             flash("Email address already exists")
             return redirect(url_for("signup"))
@@ -108,7 +111,7 @@ def init_routes(app):
         remember = True if request.form.get("remember") else False
 
         # Check if user exists
-        user = get_user_by_email(email)
+        user = User.get_by_email(email)
         if not user:
             flash("Please check your login details and try again.")
             return redirect(url_for("login"))
@@ -136,7 +139,7 @@ def init_routes(app):
         email = request.get_json()["email"]
 
         # Check if user exists
-        user = get_user_by_email(email)
+        user = User.get_by_email(email)
         if not user:
             flash("User not found")
 
@@ -145,13 +148,13 @@ def init_routes(app):
         # Check if there is already a reset password token
         # If there is, delete the existing one and create a new one
         if not user.reset_token:
-            reset_token.append(create_reset_token(user))
+            reset_token.append(Pass.create_reset_token(user))
         elif user.reset_token:
             if user.reset_token.expires_at > datetime.now():
-                delete_reset_token(user.reset_token)
-                reset_token.append(create_reset_token(user))
+                Pass.delete_reset_token(user.reset_token)
+                reset_token.append(Pass.create_reset_token(user))
             elif user.reset_token.expires_at < datetime.now():
-                reset_token.append(create_reset_token(user))
+                reset_token.append(Pass.create_reset_token(user))
 
         db.session.add(reset_token[0])
         db.session.commit()
@@ -164,7 +167,7 @@ def init_routes(app):
         token = request.get_json()["reset-token"]
         new_password = request.get_json()["password"]
 
-        reset_token = get_reset_token(token)
+        reset_token = Pass.get_reset_token(token)
 
         # Check if token exists
         if not reset_token:
@@ -178,7 +181,7 @@ def init_routes(app):
 
         # Update user password
         update_password(reset_token.user, new_password)
-        delete_reset_token(reset_token)
+        Pass.delete_reset_token(reset_token)
 
         return jsonify({"Status": 200, "Message": "Password updated successfully"})
 

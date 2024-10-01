@@ -35,7 +35,7 @@
           </div>
         </label>
         {% if auth['profile_image_url'] is not none %}
-          <button style="width: 100%; background-color: var(--destructive);" type="button">Delete Image</button>
+          <button style="width: 100%; background-color: var(--destructive);" type="button" onclick="handleDeleteImage()">Delete Image</button>
         {% endif %}
       </div>
       
@@ -74,7 +74,9 @@
           <input type="text" id="letterboxd" name="letterboxd" autocomplete="username" disabled value="{{ auth.letterboxd_username }}" placeholder="Please Enter Your Letterboxd Username" style="border-bottom: 1px solid transparent;">
         </div>
 
-        <button class="save-changes" style="margin-top: auto" type="submit">Save Changes</button>
+        <form method="DELETE" action="/profile">
+          <button class="save-changes" style="margin-top: auto" type="submit" onclick="(e) => console.log(e.target.parentNode)">Save Changes</button>
+        </form>
       </div>
     </div>
 
@@ -99,6 +101,17 @@
     imageInput.value = '';
 
     handleToggleEdit();
+  }
+
+  function toggleLoading() {
+    const buttons = document.querySelectorAll('form.auth-card button')
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach((el) => {
+      el.disabled = !el.disabled;
+    });
+    buttons.forEach((el) => {
+      el.disabled = !el.disabled;
+    });
   }
 
   async function handleToggleEdit() {
@@ -132,6 +145,19 @@
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  }
+
+  async function handleDeleteImage() {
+    toggleLoading()
+    
+    const req = await fetch('/profile', { method: 'DELETE' });
+    const res = await req.json();
+
+    if (res.Status === 200) {
+      window.location.reload()
+    }
+
+    toggleLoading()
   }
 
   imageInput.addEventListener('change', async (e) => {

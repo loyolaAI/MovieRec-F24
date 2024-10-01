@@ -72,6 +72,17 @@ h1 {
 a {
   color: inherit;
 }
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.mobile-only {
+  display: none;
+}
+.desktop-only {
+  display: flex;
+}
 
 /* ============ CSS RESETS ============ */
 
@@ -476,6 +487,48 @@ main {
   .img-upload {
     width: 100%;
     height: auto;
+  }
+
+  .profile-dropdown-container {
+    position: static;
+
+    &:has(div.profile-dropdown)::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 10;
+      transform: translateX(100%);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    &:has(div.profile-dropdown.show)::after {
+      transform: translateX(0);
+    }
+  }
+
+  .profile-dropdown {
+    position: fixed !important;
+    top: 0px !important;
+    height: 100vh;
+    z-index: 11;
+
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+
+    & > a {
+      background-color: rgb(0,0,0,0.05);
+    }
+  }
+
+  .mobile-only {
+    display: flex;
+  }
+  .desktop-only {
+    display: none;
   }
 }
 

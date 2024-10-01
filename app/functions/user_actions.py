@@ -3,14 +3,16 @@ from app.db_models.user import User
 from app.db_models.password_reset_token import PasswordResetToken as Pass
 from app import db
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from typing import Callable
-from datetime import datetime, timedelta
 from cuid2 import cuid_wrapper  # type: ignore
-import secrets
 
 cuid_generator: Callable[[], str] = cuid_wrapper()
 
-import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
@@ -29,28 +31,6 @@ def create_user(email: str, username: str, password: str, letterboxd: str) -> Us
     )
 
 
-def get_user_by_email(email: str) -> User:
-    return User.query.filter_by(email=email).first()
-
-
-def create_reset_token(user: User) -> Pass:
-    now = datetime.now()
-
-    return Pass(
-        id=cuid_generator(),
-        email=user.email,
-        token=f"{secrets.randbelow(1000000):06d}",  # 6 digit token, formatted as a string, and padded with 0s if necessary
-        expires_at=now + timedelta(minutes=15),
-        user_id=user.id,
-        user=user,
-    )
-
-
-# to be implemented
-def upload_image(image, user_id: str) -> None:
-    pass
-
-
 def update_user(user: User, username: str, email: str, letterboxd: str, *imgData: dict) -> None:
     user.email = email
     user.username = username
@@ -63,15 +43,6 @@ def update_user(user: User, username: str, email: str, letterboxd: str, *imgData
     db.session.commit()
 
 
-def delete_reset_token(token: Pass) -> None:
-    db.session.delete(token)
-    db.session.commit()
-
-
-def get_reset_token(token: str) -> Pass:
-    return Pass.query.filter_by(token=token).first()
-
-
 def update_password(user: User, new_password: str) -> None:
     user.password = generate_password_hash(new_password)
     db.session.commit()
@@ -79,13 +50,13 @@ def update_password(user: User, new_password: str) -> None:
 
 def send_password_reset_email(user: User, token: Pass) -> None:
     message = Mail(
-        from_email="",
+        from_email="no-reply@dacs-digital.design",
         to_emails=user.email,
         subject="LAIC MovieRec Password Reset",
         html_content=construct_reset_password_email(token),
     )
 
-    sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
     sg.send(message)
 
 
