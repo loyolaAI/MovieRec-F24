@@ -1,0 +1,79 @@
+<!-- https://www.figma.com/proto/xCQVJTNH7W89hGw1UcIeTF/AI-Club-Movie-Rec?node-id=1-2&t=MrUPHNe0JSrllMlu-1 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Club | MovieRec</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/mainPage.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@3.0.1/modern-normalize.min.css">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body class="space-mono-regular">
+  <header>
+    <h1>
+      <img alt="logo" src="{{url_for('static', filename='logo.png')}}"/>
+      <a href="/">AI Club</a>
+    </h1>
+
+    {% with auth = current_user %}
+    {% if auth.is_authenticated %}
+      <div class="profile-dropdown-container">
+        <img
+          src="{{ auth['profile_image_url'] }}"
+          alt='{% for i in range(("Joel Gutierrez").split(" ")|length)[:2] %}{{("Joel Gutierrez").split(" ")[i][0]}}{% endfor %}'
+          class="profile-picture"
+          style="font-size: 24px;"
+          onclick="document.querySelector('div.profile-dropdown').classList.toggle('show')"
+        />
+
+        <div class="profile-dropdown">
+          <h3 style="margin-top: 0px; font-weight: 400; font-size: 1.5rem; margin-bottom: 2rem;" class="mobile-only">Hi, {{ auth["username"] }}</h3>
+
+          <a href="/profile">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="5"/>
+              <path d="M20 21a8 8 0 0 0-16 0"/>
+            </svg>
+
+            Profile
+          </a>
+          <a href="/logout" style="margin-top: auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" x2="9" y1="12" y2="12"/>
+            </svg>
+
+            Logout
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 20a6 6 0 0 0-12 0"/>
+        <circle cx="12" cy="10" r="4"/>
+        <circle cx="12" cy="12" r="10"/>    
+      </svg>
+    {% endif %}
+    {% endwith %}
+    
+  </header>
+  <main>  
+    {% block content %}
+    {% endblock %}
+  </main>
+</body>
+<script>
+  setTimeout(() => {
+    document.querySelector('div.profile-dropdown').style.transitionDuration = '0.2s'
+  }, '0.2s')
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.matches('.profile-picture')) {
+      document.querySelector('div.profile-dropdown').classList.remove('show')
+    }
+  })
+</script>
+</html>
