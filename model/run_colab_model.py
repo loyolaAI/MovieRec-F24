@@ -22,24 +22,25 @@ FUNCTION get_top_recs(predictions, n=20):
     RETURN the top n items from top_rec
 """
 
+
 def run_colab_model(algo, user_data, movies, num_recs=25):
     """
     WE need to load the .pkl file and run the model on movies the given user has not seen
     """
 
     # Identify movies the user has not watched
-    # Call get_unwatched_movies in get_user_data.py 
+    # Call get_unwatched_movies in get_user_data.py
     # unwatched_movies = get_unwatched_movies(user_data)
     # prediction_set = CREATE list of tuples (username, movie_id, 0) for each movie in unwatched_movies
 
     # Get predictions from the algorithm
     # predictions = TEST algorithm using prediction_set
     # predictions = algo.test(prediction_set)
-    # Call the get_top_recs to get the highest rated recommendations 
+    # Call the get_top_recs to get the highest rated recommendations
     # top_recs = get_top_recs(predictions, num_recommendations)
 
     # Get movie details from "movies.csv.gz" file
-    # Using the movie name we got recommended, we can pull info from the csv we have 
+    # Using the movie name we got recommended, we can pull info from the csv we have
     # to get the year, actors, ect
     # res = more_movie_info
 
@@ -65,4 +66,3 @@ if __name__ == "__main__":
     recommendations = run_colab_model(algo, user_data, movies)
     print(recommendatios)
     """
-    

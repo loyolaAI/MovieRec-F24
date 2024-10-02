@@ -52,8 +52,13 @@ def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
     #     {"username": username_list[:9], "Movie_name": movie_name, "Movie_name_slug": movie_names_slug[:9], "star_rating": int_movie_ratings[:9]}
     # )
     return pd.DataFrame(
-        {"username": username_list, "Movie_name_slug": movie_names_slug, "star_rating": int_movie_ratings}
+        {
+            "username": username_list,
+            "Movie_name_slug": movie_names_slug,
+            "star_rating": int_movie_ratings,
+        }
     )
+
 
 # Sample use
 username = input("Please type your letterboxd username : ")
