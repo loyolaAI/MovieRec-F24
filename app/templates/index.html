@@ -1,60 +1,13 @@
-<!-- https://www.figma.com/proto/xCQVJTNH7W89hGw1UcIeTF/AI-Club-Movie-Rec?node-id=1-2&t=MrUPHNe0JSrllMlu-1 -->
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Club | MovieRec</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/mainPage.css') }}">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@3.0.1/modern-normalize.min.css">
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"></head>
-<body class="space-mono-regular">
-  <header>
-    <h1>
-      <img alt="logo" src="{{url_for('static', filename='logo.png')}}"/>
-      <a href="index.html">AI Club</a>
-    </h1>
-
-    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user-round">
-      <path d="M18 20a6 6 0 0 0-12 0"/>
-      <circle cx="12" cy="10" r="4"/>
-      <circle cx="12" cy="12" r="10"/>
-    </svg>
-  </header>
-  <main>
-    <h1 style="font-size: xx-large; margin-top: 0; text-decoration: underline; text-align: center;">Movie Recommendations</h1>
-
-
-  </main>
-  
-  
-  <!-- <script>
-    async function makePrediction() {
-    const input = document.getElementById('inputData').value;
-    const inputData = input.split(',').map(Number);  // Convert input to an array of numbers
-    
-    try {
-    const response = await fetch('/predict', {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ input: inputData })
-    });
-    
-    if (!response.ok) {
-    console.error('Error with request:', response.statusText);
-    return;
-    }
-    
-    const result = await response.json();
-    document.getElementById('predictionResult').innerText = result.prediction;
-    } catch (error) {
-    console.error('Error:', error);
-    }
-    }
-  </script> -->
-  
-</body>
-</html>
+{% block content %}
+<h1 class="title">
+  Flask Login Example
+</h1>
+<h2 class="subtitle">
+  Easy authentication and authorization in Flask.
+</h2>
+<p>
+  {{user}}
+</p>
+{% endblock %}

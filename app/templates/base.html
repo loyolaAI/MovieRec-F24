@@ -1,0 +1,33 @@
+<!-- https://www.figma.com/proto/xCQVJTNH7W89hGw1UcIeTF/AI-Club-Movie-Rec?node-id=1-2&t=MrUPHNe0JSrllMlu-1 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Club | MovieRec</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/mainPage.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize@3.0.1/modern-normalize.min.css">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"></head>
+<body class="space-mono-regular">
+  <header>
+    <h1>
+      <img alt="logo" src="{{url_for('static', filename='logo.png')}}"/>
+      <a href="/">AI Club</a>
+    </h1>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user-round">
+      <path d="M18 20a6 6 0 0 0-12 0"/>
+      <circle cx="12" cy="10" r="4"/>
+      <circle cx="12" cy="12" r="10"/>
+    </svg>
+  </header>
+  <main>
+    {% block content %}
+    {% endblock %}
+  </main>
+</body>
+<script>
+  // Get authentication status from the server
+</script>
+</html>
