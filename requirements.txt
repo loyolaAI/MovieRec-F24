@@ -28,3 +28,6 @@ flask_migrate==4.0.7
 flask_sqlalchemy==3.1.1
 flask_login==0.6.3
 cuid2==2.0.1
+sendgrid==6.11.0
+cloudinary==1.41.0
+python-dotenv==1.0.1
