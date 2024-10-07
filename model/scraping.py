@@ -10,7 +10,7 @@ import pandas as pd
 # Method to scrape a given users letterboxd profile and get information about the users movies and ratings
 def scrap_letterboxd(username: str):
     # Given the username, create the letterboxd url so we can scrap the movies
-    url = "https://letterboxd.com/" + username.strip() + "/films/page/1/"
+    url = "https://letterboxd.com/" + username.strip() + "/films/page/2/"
 
     # Initialize the regular expressions which will scan the soup file
     # for all of the movie names and star ratings.
@@ -27,6 +27,30 @@ def scrap_letterboxd(username: str):
     # This automatically creates a list for each variable.
     movie_names = re.findall(regex_movie_names, str(film_html))
     movie_ratings = re.findall(regex_movie_ratings, str(film_html))
+
+    """ Now we're going to remove the movies from the users letterbox'd that don't
+        have a rating associated with them. Because it won't add to the model and
+        it will break when we try and create a dataframe.   """
+    # We now get the url for the movies that don't have any reviews.
+    url_no_reviews = "https://letterboxd.com/" + username.strip() + "/films/rated/none/"
+
+    # Make the soup to pull everything off that webpage.
+    soup = BeautifulSoup(requests.get(url_no_reviews).text, "html.parser")
+
+    # Now scrap everything from only the reviews section. that is the 'list__...'
+    film_html_no_reviews = soup.find_all("li", class_=re.compile(r"poster-container"))
+
+    # Get the list of all the removed movies.
+    removed_movie_names = re.findall(r'data-film-slug="([^"]+)"', str(film_html_no_reviews))
+
+    # Loop over all the movies we found, and remove them so that
+    # len(movie_names) == len(movie_ratings) and we don't have movies without ratings
+    for movie in removed_movie_names:
+        # If the movie exists within the lists we should remove it
+        # We wont need this when we scrape all the movies instead of
+        # only the first page.
+        if movie in movie_names:
+            movie_names.remove(movie)
 
     # Return the results
     return movie_names, movie_ratings
