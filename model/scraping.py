@@ -10,7 +10,7 @@ import pandas as pd
 # Method to scrape a given users letterboxd profile and get information about the users movies and ratings
 def scrap_letterboxd(username: str):
     # Given the username, create the letterboxd url so we can scrap the movies
-    url = "https://letterboxd.com/" + username.strip() + "/films/page/2/"
+    url = "https://letterboxd.com/" + username.strip() + "/films/page/1/"
 
     # Initialize the regular expressions which will scan the soup file
     # for all of the movie names and star ratings.
@@ -43,14 +43,12 @@ def scrap_letterboxd(username: str):
     # Get the list of all the removed movies.
     removed_movie_names = re.findall(r'data-film-slug="([^"]+)"', str(film_html_no_reviews))
 
-    # Loop over all the movies we found, and remove them so that
-    # len(movie_names) == len(movie_ratings) and we don't have movies without ratings
-    for movie in removed_movie_names:
-        # If the movie exists within the lists we should remove it
-        # We wont need this when we scrape all the movies instead of
-        # only the first page.
-        if movie in movie_names:
-            movie_names.remove(movie)
+    """ Loop over all the movies we found, and remove them so that
+    len(movie_names) == len(movie_ratings) and we don't have movies without ratings
+    If the movie exists within the lists we should remove it
+    We wont need this when we scrape all the movies instead of
+    only the first page. """
+    movie_names = [movie for movie in movie_names if movie not in removed_movie_names]
 
     # Return the results
     return movie_names, movie_ratings
