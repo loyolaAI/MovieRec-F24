@@ -4,11 +4,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-def load_data(file_path="./data/movies.csv.gz"):
+def load_data(file_path="./model/data/movies.csv.gz"):
     """
     Load the dataset from a CSV file.
     """
-    # TODO might not be working
     if file_path.split(".")[-1] == ".gz":
         movies = pd.read_csv(file_path, compression="gzip")
     else:
@@ -20,12 +19,13 @@ def preprocess_data(movies: pd.DataFrame):
     """
     Combine genres, director, actors, and writes into a single feature for each movie.
     """
-    # TODO
-    # something like
-    # movies['combined_features'] = movies['genres'] + ' ' + movies['director']
-    # ect...
-    # Note. you should parse movies['genres'] using something like .split("|") because the format is
-    # genre1 | genre2 | ... and we want just spaces no vertical bars
+    # Removing the bars ("|") and whitespaces
+    movies['Genres'] = movies['Genres'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
+    movies['Stars'] = movies['Stars'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
+    movies['Writers'] = movies['Writers'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
+    movies['Directors'] = movies['Directors'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
+    # Create the combined column
+    movies['Combined'] = movies['Genres'] + ' ' + movies['Directors'] + ' ' + movies['Stars'] + ' ' + movies['Writers']
     return movies
 
 
@@ -102,7 +102,7 @@ def get_recommendations_for_user(user_movies, movies, cosine_sim, top_n=5):
 # Main workflow
 if __name__ == "__main__":
     # Load the data
-    movie_data_file = "./data/movies.csv.gz"  # Path to your dataset
+    movie_data_file = "./model/data/movies.csv.gz"  # Path to your dataset
     movies = load_data(movie_data_file)
 
     # Preprocess the data
