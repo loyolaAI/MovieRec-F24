@@ -21,7 +21,7 @@ def init_routes(app):
     @app.route("/")
     @login_required
     def home():
-        return render_template("index.html", user=current_user)
+        return render_template("index.html")
 
     # Recommendation
     @app.route("/recommend", methods=["POST"])

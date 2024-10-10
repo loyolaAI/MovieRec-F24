@@ -2,15 +2,13 @@
 
 {% block content %}
 {% with auth = current_user %}
-<section class="container">
-  <h1 style="width: 100%; max-width: 754px; margin: 0 auto;">Profile</h1>
-  <form class="auth-card" style="max-width: 754px; width: 100%; margin-top: 1rem;" autocomplete="off" method="POST" action="/profile" enctype="multipart/form-data">
-    <span style="font-size: large; font-weight: bold;">LAIC MovieRec Profile</span>
-    
-    <div class="profile-form-container" style="max-width: 400px;">
+<main class="container" style="padding: 4rem;">
+  <h1 style="width: 100%; margin-bottom: 2rem;">Welcome back, {{ auth['username'] }}</h1>
+  <form class="auth-card" style="width: 100%; max-width: 100%; margin-top: 1rem; background: rgba(255,255,255,0.05);" autocomplete="off" method="POST" action="/profile" enctype="multipart/form-data">
+    <div class="profile-form-container">
       <div>
         <label for="pfp" class="img-upload">
-          <input type="file" id="pfp" name="pfp" accept="image/*" style="width: 256px; height: 256px; z-index: 3; opacity: 0; cursor: pointer;" disabled>
+          <input type="file" id="pfp" name="pfp" accept="image/*" style="width: 256px; height: 256px; z-index: 3; opacity: 0;" disabled>
           {% if auth['profile_image_url'] is none %}
             <img
               src=""
@@ -61,17 +59,17 @@
 
         <div class="input-container">
           <label for="email">Email <span>*</span></label>
-          <input type="email" id="email" name="email" autocomplete="email" disabled value="{{ auth.email }}" placeholder="Please Enter Your Email" style="border-bottom: 1px solid transparent;">
+          <input type="email" id="email" name="email" autocomplete="email" disabled value="{{ auth.email }}" placeholder="Please Enter Your Email" style="border-bottom: 1px solid gray;">
         </div>
         
         <div class="input-container">
           <label for="username">Username <span>*</span></label>
-          <input type="text" id="username" name="username" autocomplete="username" disabled value="{{ auth.username }}" placeholder="Please Enter Your Username" style="border-bottom: 1px solid transparent;">
+          <input type="text" id="username" name="username" autocomplete="username" disabled value="{{ auth.username }}" placeholder="Please Enter Your Username" style="border-bottom: 1px solid gray;">
         </div>
     
         <div class="input-container">
           <label for="letterboxd">Letterboxd Username <span>*</span></label>
-          <input type="text" id="letterboxd" name="letterboxd" autocomplete="username" disabled value="{{ auth.letterboxd_username }}" placeholder="Please Enter Your Letterboxd Username" style="border-bottom: 1px solid transparent;">
+          <input type="text" id="letterboxd" name="letterboxd" autocomplete="username" disabled value="{{ auth.letterboxd_username }}" placeholder="Please Enter Your Letterboxd Username" style="border-bottom: 1px solid gray;">
         </div>
 
         <form method="DELETE" action="/profile">
@@ -81,7 +79,7 @@
     </div>
 
   </form>
-</section>
+</main>
 <script>
   const data = {
     email: '{{ auth.email }}',
@@ -128,7 +126,7 @@
 
     inputs.forEach((el) => {
       el.disabled = !isEditing;
-      el.style.borderBottom = isEditing ? '1px solid var(--primary)' : '1px solid transparent';
+      el.style.borderBottom = isEditing ? '1px solid var(--primary)' : '1px solid gray';
     });
 
     if (imageInput && imageInput.files.length > 0 && isEditing) {
