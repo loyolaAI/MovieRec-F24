@@ -14,6 +14,9 @@ import random
 
 import os
 
+from build_colab_model import build_colab_model
+from get_user_data import get_unwatched_movies
+from scraping import scrape_and_make_dataframe
 
 """
 FUNCTION get_top_recs(predictions, n=20):
@@ -23,15 +26,37 @@ FUNCTION get_top_recs(predictions, n=20):
 """
 
 
-def run_colab_model(algo, user_data, movies, num_recs=25):
+def get_top_recs(predictions, num_recs):
+    top_n = [(iid, est) for uid, iid, true_r, est, _ in predictions]
+    top_n.sort(key=lambda x: (x[1], random.random()), reverse=True)
+
+    return top_n[:num_recs]
+
+
+def run_colab_model(algo, user_data, movies, accuracy: float, username, num_recs=25):
     """
     WE need to load the .pkl file and run the model on movies the given user has not seen
     """
 
-    # Identify movies the user has not watched
-    # Call get_unwatched_movies in get_user_data.py
-    # unwatched_movies = get_unwatched_movies(user_data)
-    # prediction_set = CREATE list of tuples (username, movie_id, 0) for each movie in unwatched_movies
+    # Identify movies the user has not watched, type list.
+    print("#### Get all the movies the user has not watched")
+    unwatched_movies = get_unwatched_movies(user_data, movies, accuracy)
+    print(unwatched_movies[:10])
+
+    # Create the prediction set which will hold a given users film and the predicted rating for it.
+    prediction_set = [(username, film_id, 0) for film_id in unwatched_movies]
+
+    # predict!
+    predictions = algo.test(prediction_set)
+    print("#### Get all the movies rating predictions from the model")
+    print("#### Sort and get the top recommendations")
+    print("#### print out the recommendations")
+    top_recs = get_top_recs(predictions, num_recs)
+    # Print the recommended items for user
+    for prediction in top_recs:
+        print(f"{prediction[0]}: {round(prediction[1], 2)}")
+
+    return "lol"
 
     # Get predictions from the algorithm
     # predictions = TEST algorithm using prediction_set
@@ -64,5 +89,22 @@ if __name__ == "__main__":
     Within get_user_data.py for this data, instead we use the sample data.
     user_data = pd.read_csv("./data/sample_user_data.csv")
     recommendations = run_colab_model(algo, user_data, movies)
-    print(recommendatios)
+    print(recommendation)
     """
+
+    accuracy = float(input("How accurate do you want the model to be (range 0.01-1.0) "))
+    # Normally we would scrap the data and then call the "get_movie_info" method
+    # Within get_user_data.py for this data, instead we use the sample data.
+    username = input("What is your letterboxd username ")
+    print("#### scraping User data")
+    user_data = scrape_and_make_dataframe(username)
+    print(user_data)
+    print("#### Scraping user data completed")
+    print("#### Loading in movies dataset")
+    df = pd.read_csv("./data/ratings.csv.gz", compression="gzip")
+    print(df.head(10))
+    print("#### Done loading movies dataset")
+    print("#### Build the colab model")
+    algo = build_colab_model(df, user_data, accuracy)
+    print("#### Run the colab model")
+    recs = run_colab_model(algo, user_data, df, accuracy, username, 20)

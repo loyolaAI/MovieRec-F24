@@ -67,12 +67,13 @@ def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
 
     # Return the results as a Pandas dataframe
     return pd.DataFrame(
-        {"username": username_list, "Movie": movie_name, "star_rating": int_movie_ratings}
+        {"username": username_list, "film_id": movie_name, "star_rating": int_movie_ratings}
     )
 
 
-# Sample use
-username = input("Please type your letterboxd username : ")
-print(f"Now scraping : {username}")
-df = scrape_and_make_dataframe(username.strip())
-print(df)
+if __name__ == "__main__":
+    # Sample use
+    username = input("Please type your letterboxd username : ")
+    print(f"Now scraping : {username}")
+    df = scrape_and_make_dataframe(username.strip())
+    print(df)
