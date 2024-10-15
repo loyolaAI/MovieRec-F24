@@ -65,6 +65,7 @@ if __name__ == "__main__":
     # just using sample accuracy and user data, for proof of concept
     accuracy = 0.05
     from get_user_data import get_movie_dataframe
+
     df = get_movie_dataframe(accuracy)
     user_data = pd.read_csv("./data/sample_user_data.csv")
     algo = build_colab_model(df, user_data, accuracy)
