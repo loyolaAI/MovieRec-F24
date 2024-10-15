@@ -67,7 +67,7 @@ def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
 
     # Return the results as a Pandas dataframe
     return pd.DataFrame(
-        {"username": username_list, "film_id": movie_name, "star_rating": int_movie_ratings}
+        {"user_name": username_list, "film_id": movie_name, "rating": int_movie_ratings}
     )
 
 

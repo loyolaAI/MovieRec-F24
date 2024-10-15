@@ -20,17 +20,48 @@ def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame, accuracy
     the user has not seen.
     """
 
-    # Get a set of movie IDs that the user has already watched
-    watched_movies = set(user_data["film_id"].unique())
 
-    # We need to truncate the movies by the same amount that we did when we built the model
-    truncate = len(movies) * accuracy
-    movies = movies.head(int(truncate))
+def get_movie_dataframe(accuracy: float) -> pd.DataFrame:
+    # Total length of all the ratings data, combined
+    total_len = 18175545
 
-    # Get a set of all movie IDs
-    all_movies = set(movies["film_id"].unique())
+    # Calculate the total number of rows needed
+    total_needed_rows = int(total_len * accuracy)
 
-    # Get the difference: movies the user hasn't watched
-    unwatched_movies = list(all_movies - watched_movies)
+    # List of CSV file paths
+    zipped_csv_files = [
+        "./data/ratings/ratings1.csv.gz",
+        "./data/ratings/ratings2.csv.gz",
+        "./data/ratings/ratings3.csv.gz",
+        "./data/ratings/ratings4.csv.gz",
+    ]
 
-    return unwatched_movies
+    # DataFrames list to store each chunk
+    dfs = []
+
+    # Track how many rows have been read so far
+    rows_read = 0
+
+    # Loop through the CSV files
+    for file in zipped_csv_files:
+        # Figure out how many rows we need to read
+        rows_to_read = total_needed_rows - rows_read
+
+        # If there are still rows to read
+        if rows_to_read > 0:
+            # Read the csv, this works because of rows_to_read > len(csv) it
+            # stops reading, instead of throwing an error
+            chunk = pd.read_csv(file, compression="gzip", nrows=rows_to_read)
+            # Increment the counter with the number of rows read
+            rows_read += len(chunk)
+
+            # Append the chunk to the DataFrame list
+            dfs.append(chunk)
+
+        # Break if we've read enough rows
+        if rows_read >= total_needed_rows:
+            break
+
+    # Concatenate all the chunks into a single DataFrame
+    df = pd.concat(dfs, ignore_index=True)
+    return df
