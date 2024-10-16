@@ -25,7 +25,12 @@ def preprocess_data(movies: pd.DataFrame):
     movies['Writers'] = movies['Writers'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
     movies['Directors'] = movies['Directors'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
     # Create the combined column
-    movies['Combined'] = movies['Genres'] + ' ' + movies['Directors'] + ' ' + movies['Stars'] + ' ' + movies['Writers']
+    movies['combined_features'] = movies['Genres'] + ' ' + movies['Directors'] + ' ' + movies['Stars'] + ' ' + movies['Writers']
+    # Drop unncessesary columns
+    movies = movies.drop(columns=['Genres','Directors','Stars','Writers'])
+    #movies = movies.iloc[:26503]
+    # If there are RAM allocation errors during testing, uncomment the following line
+    print(movies)
     return movies
 
 
@@ -33,7 +38,6 @@ def create_tfidf_matrix(movies):
     """
     Create the TF-IDF matrix from the combined movie features.
     """
-    # TODO might not be working
     tfidf = TfidfVectorizer(stop_words="english")
     tfidf_matrix = tfidf.fit_transform(movies["combined_features"])
     return tfidf, tfidf_matrix
@@ -43,7 +47,7 @@ def compute_cosine_similarity(tfidf_matrix):
     """
     Compute cosine similarity between movies based on the TF-IDF matrix.
     """
-    # TODO might not be working
+    # For RAM errors, try to send only a snippet of the full movies data. The final version will use all of the data on a more beefy computer
     cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
     return cosine_sim
 
@@ -52,13 +56,12 @@ def get_recommendations(title, movies, cosine_sim):
     """
     Get the top 5 movie recommendations based on the title.
     """
-    # TODO probably not working.
-    idx = movies[movies["title"] == title].index[0]
+    idx = movies[movies["Title"] == title].index[0]
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     sim_scores = sim_scores[1:6]  # Skip the first one (self match)
     movie_indices = [i[0] for i in sim_scores]
-    return movies["title"].iloc[movie_indices]
+    return movies["Title"].iloc[movie_indices]
 
 
 # The methods below were written by chatGPT and will be used for a later implementation
