@@ -2,6 +2,26 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import psutil
+
+
+def has_enough_ram(required_ram_gb):
+    """
+    Checks if the system has enough RAM.
+
+    Args:
+      required_ram_gb: The required RAM in gigabytes.
+
+    Returns:
+      True if the system has enough RAM, False otherwise.
+    """
+
+    # Get the total physical memory in bytes.
+    total_ram = psutil.virtual_memory().total
+    # Convert bytes to gigabytes.
+    total_ram_gb = total_ram / (1024**3)
+
+    return total_ram_gb >= required_ram_gb
 
 
 def load_data(file_path="./model/data/movies.csv.gz"):
@@ -20,17 +40,35 @@ def preprocess_data(movies: pd.DataFrame):
     Combine genres, director, actors, and writes into a single feature for each movie.
     """
     # Removing the bars ("|") and whitespaces
-    movies['Genres'] = movies['Genres'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
-    movies['Stars'] = movies['Stars'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
-    movies['Writers'] = movies['Writers'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
-    movies['Directors'] = movies['Directors'].astype(str).apply(lambda x: ' '.join(x.split('|')).strip())
+    movies["Genres"] = movies["Genres"].astype(str).apply(lambda x: " ".join(x.split("|")).strip())
+    movies["Stars"] = movies["Stars"].astype(str).apply(lambda x: " ".join(x.split("|")).strip())
+    movies["Writers"] = (
+        movies["Writers"].astype(str).apply(lambda x: " ".join(x.split("|")).strip())
+    )
+    movies["Directors"] = (
+        movies["Directors"].astype(str).apply(lambda x: " ".join(x.split("|")).strip())
+    )
     # Create the combined column
-    movies['combined_features'] = movies['Genres'] + ' ' + movies['Directors'] + ' ' + movies['Stars'] + ' ' + movies['Writers']
+    movies["combined_features"] = (
+        movies["Genres"]
+        + " "
+        + movies["Directors"]
+        + " "
+        + movies["Stars"]
+        + " "
+        + movies["Writers"]
+    )
     # Drop unncessesary columns
-    movies = movies.drop(columns=['Genres','Directors','Stars','Writers'])
-    #movies = movies.iloc[:26503]
-    # If there are RAM allocation errors during testing, uncomment the following line
-    print(movies)
+    movies = movies.drop(columns=["Genres", "Directors", "Stars", "Writers"])
+    # Avoids errors like "numpy._core._exceptions._ArrayMemoryError: Unable to allocate 53.6 GiB for an array with shape (7197683643,) and data type int64"
+    if not has_enough_ram(54):
+        rows = 20000
+        print(
+            "System does not have enough RAM allocated to process the full dataset. Falling back to a small portion of the dataset with "
+            + str(rows)
+            + "/{0:2d} items that takes ~5 GB".format(len(movies))
+        )
+        movies = movies.iloc[:rows]
     return movies
 
 
