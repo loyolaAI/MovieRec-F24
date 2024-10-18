@@ -144,8 +144,9 @@ def init_routes(app):
 
         # Check if user exists
         user = User.get_by_email(email)
-        if not user:
+        if user is None:
             flash("User not found")
+            return jsonify({"Status": 404, "Message": "User not found", "ok": False})
 
         reset_token = []
 
@@ -163,7 +164,7 @@ def init_routes(app):
         db.session.add(reset_token[0])
         db.session.commit()
 
-        send_password_reset_email(user, reset_token[0])
+        # send_password_reset_email(user, reset_token[0])
         return jsonify({"Status": 200, "token": reset_token[0].token})
 
     @app.route("/reset-password-token", methods=["POST"])
