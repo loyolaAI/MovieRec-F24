@@ -280,6 +280,7 @@ main {
 .auth-page-container {
   display: flex;
   justify-content: center;
+  flex-direction: column;
   align-items: center;
   grid-column: span 14;
 }

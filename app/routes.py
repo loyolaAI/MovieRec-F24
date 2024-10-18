@@ -4,7 +4,6 @@ from werkzeug.security import check_password_hash
 from datetime import datetime
 
 from app.functions.movie_recommender import movie_recommendation
-from app.mockdata import data
 from app.db_models.user import User
 from app.db_models.password_reset_token import PasswordResetToken as Pass
 
@@ -15,6 +14,8 @@ from app.functions.user_actions import (
     update_user,
 )
 from app import db
+
+from app.model.scraping import scrap_letterboxd
 
 
 def init_routes(app):
@@ -87,10 +88,13 @@ def init_routes(app):
         password = request.form.get("password")
 
         # Check if user already exists
-        does_user_exist = email
+        does_user_exist = User.get_by_email(email)
         if does_user_exist:
             flash("Email address already exists")
             return redirect(url_for("signup"))
+
+        # Fetch user ratings from letterbox
+        # movie_names, movie_ratings = scrap_letterboxd(letterboxd)
 
         # Create User
         new_user = create_user(email, username, password, letterboxd)
