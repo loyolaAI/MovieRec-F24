@@ -15,9 +15,6 @@ from app.functions.user_actions import (
 )
 from app import db
 
-from app.model.scraping import scrap_letterboxd
-
-
 def init_routes(app):
     @app.route("/")
     @login_required
