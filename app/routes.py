@@ -15,6 +15,7 @@ from app.functions.user_actions import (
 )
 from app import db
 
+
 def init_routes(app):
     @app.route("/")
     @login_required
