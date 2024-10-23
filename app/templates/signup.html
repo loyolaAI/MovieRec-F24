@@ -1,11 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container auth-page-container" style="gap: 0.5rem;">
+<style>
+  body {
+    margin: 0;
+    width: 100vw;
+    max-width: 100vw;
+  }
+</style>
+<img style="position: fixed; top: 0px; left: 0px; height: 100vh; width: 100vw; filter: blur(16px);" src="{{ url_for('static', filename='background.svg') }}"/>
+<div class="container auth-page-container" style="gap: 0.5rem; z-index: 1;">
   {% with messages = get_flashed_messages() %}
   {% if messages %}
-      <div class="notification is-danger">
-          Error: {{ messages[0] }}
+      <div class="notification">
+          {{ messages[0] }}
       </div>
   {% endif %}
   {% endwith %}

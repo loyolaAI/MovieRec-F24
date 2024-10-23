@@ -4,7 +4,6 @@ from werkzeug.security import check_password_hash
 from datetime import datetime
 
 from app.functions.movie_recommender import movie_recommendation
-from app.mockdata import data
 from app.db_models.user import User
 from app.db_models.password_reset_token import PasswordResetToken as Pass
 
@@ -16,12 +15,14 @@ from app.functions.user_actions import (
 )
 from app import db
 
+# from app.model.scraping import scrap_letterboxd
+
 
 def init_routes(app):
     @app.route("/")
     @login_required
     def home():
-        return render_template("index.html", user=current_user)
+        return render_template("index.html")
 
     # Recommendation
     @app.route("/recommend", methods=["POST"])
@@ -87,10 +88,13 @@ def init_routes(app):
         password = request.form.get("password")
 
         # Check if user already exists
-        does_user_exist = email
+        does_user_exist = User.get_by_email(email)
         if does_user_exist:
-            flash("Email address already exists")
+            flash("Error: Email address already exists")
             return redirect(url_for("signup"))
+
+        # Fetch user ratings from letterbox
+        # movie_names, movie_ratings = scrap_letterboxd(letterboxd)
 
         # Create User
         new_user = create_user(email, username, password, letterboxd)
@@ -113,13 +117,19 @@ def init_routes(app):
         # Check if user exists
         user = User.get_by_email(email)
         if not user:
-            flash("Please check your login details and try again.")
+            flash("Error: Please check your login details and try again.")
             return redirect(url_for("login"))
 
         # Check if password is correct
         if not check_password_hash(user.password, password):
-            flash("Please check your login details and try again.")
+            flash("Error: Please check your login details and try again.")
             return redirect(url_for("login"))
+
+        # While we're at it, check if there are any expired reset tokens
+        # If we find any, delete them
+        token = user.reset_token
+        if token is not None and token.expires_at < datetime.now():
+            Pass.delete_reset_token(token)
 
         login_user(user, remember=remember)
         return redirect(url_for("home"))
@@ -136,12 +146,13 @@ def init_routes(app):
 
     @app.route("/reset-password", methods=["POST"])
     def reset_password_post():
-        email = request.get_json()["email"]
+        email = request.form.get("email")
 
         # Check if user exists
         user = User.get_by_email(email)
-        if not user:
-            flash("User not found")
+        if user is None:
+            flash("Error: User not found.")
+            return redirect(url_for("reset_password"))
 
         reset_token = []
 
@@ -159,30 +170,32 @@ def init_routes(app):
         db.session.add(reset_token[0])
         db.session.commit()
 
-        send_password_reset_email(user, reset_token[0])
-        return jsonify({"Status": 200, "token": reset_token[0].token})
+        # send_password_reset_email(user, reset_token[0])
+        flash("Password reset email sent successfully.")
+        return redirect(url_for("reset_password"))
 
     @app.route("/reset-password-token", methods=["POST"])
     def reset_password_token_post():
-        token = request.get_json()["reset-token"]
-        new_password = request.get_json()["password"]
+        token = request.form.get("reset-token")
+        new_password = request.form.get("password")
 
         reset_token = Pass.get_reset_token(token)
 
         # Check if token exists
         if not reset_token:
-            flash("Token not found")
-            return jsonify({"Status": 404, "Message": "Token not found"})
+            flash("Error: Token not found.")
+            return redirect(url_for("reset_password"))
 
         # Check if token is expired
         if reset_token.expires_at < datetime.now():
-            flash("Token has expired")
-            return jsonify({"Status": 400, "Message": "Token expired"})
+            flash("Error: Token has expired.")
+            return redirect(url_for("reset_password"))
 
         # Update user password
         update_password(reset_token.user, new_password)
         Pass.delete_reset_token(reset_token)
 
-        return jsonify({"Status": 200, "Message": "Password updated successfully"})
+        flash("Password updated successfully.")
+        return redirect(url_for("login"))
 
     # ================== Authentication Related ==================

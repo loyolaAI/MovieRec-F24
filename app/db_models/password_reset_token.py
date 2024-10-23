@@ -40,7 +40,7 @@ class PasswordResetToken(db.Model):
         )
 
     def delete_reset_token(token: "PasswordResetToken") -> None:
-        User.query.filter_by(id=token.user_id).first()
+        token.user.reset_token = None
         db.session.delete(token)
         db.session.commit()
 

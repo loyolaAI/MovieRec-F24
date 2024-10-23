@@ -44,6 +44,9 @@ class User(UserMixin, db.Model):
     def get_by_email(email: str) -> "User":
         return User.query.filter_by(email=email).first()
 
+    def get_by_letterboxd(letterboxd: str) -> "User":
+        return User.query.filter_by(letterboxd_username=letterboxd).first()
+
     # to be implemented
     def upload_image(self, image: werkzeug.datastructures.file_storage.FileStorage) -> None:
         # Configuration

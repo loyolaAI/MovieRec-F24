@@ -10,7 +10,7 @@ import pandas as pd
 # Method to scrape a given users letterboxd profile and get information about the users movies and ratings
 def scrap_letterboxd(username: str):
     # Given the username, create the letterboxd url so we can scrap the movies
-    url = "https://letterboxd.com/" + username.strip() + "/films/page/1/"
+    url = "https://letterboxd.com/" + username.strip() + "/films/by/rated-date-earliest/page/1"
 
     # Initialize the regular expressions which will scan the soup file
     # for all of the movie names and star ratings.
