@@ -1,5 +1,7 @@
 from werkzeug.security import generate_password_hash
 from app.db_models.user import User
+from app.db_models.movie import Movie
+from app.db_models.movie_rating import MovieRating
 from app.db_models.password_reset_token import PasswordResetToken as Pass
 from app import db
 
@@ -28,6 +30,17 @@ def create_user(email: str, username: str, password: str, letterboxd: str) -> Us
         reset_token=None,
         profile_image_id=None,
         profile_image_url=None,
+    )
+
+
+def create_rating(user: User, movie: Movie, rating: int) -> MovieRating:
+    return MovieRating(
+        id=cuid_generator(),
+        movie_id=movie.movie_id,
+        movie=movie,
+        _rating=rating,
+        user_id=user.id,
+        user=user,
     )
 
 

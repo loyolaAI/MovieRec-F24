@@ -3,11 +3,19 @@ from flask_login import login_required, current_user, login_user, logout_user  #
 from werkzeug.security import check_password_hash
 from datetime import datetime
 
+import sys
+
+sys.path.append("..")
+
+
 from app.functions.movie_recommender import movie_recommendation
 from app.db_models.user import User
 from app.db_models.password_reset_token import PasswordResetToken as Pass
+from app.db_models.movie import Movie
+from app.db_models.movie_rating import MovieRating
 
 from app.functions.user_actions import (
+    create_rating,
     create_user,
     update_password,
     send_password_reset_email,
@@ -15,7 +23,7 @@ from app.functions.user_actions import (
 )
 from app import db
 
-# from app.model.scraping import scrap_letterboxd
+from model.scraping import scrap_letterboxd
 
 
 def init_routes(app):
@@ -93,12 +101,24 @@ def init_routes(app):
             flash("Error: Email address already exists")
             return redirect(url_for("signup"))
 
-        # Fetch user ratings from letterbox
-        # movie_names, movie_ratings = scrap_letterboxd(letterboxd)
+        # Fetch user ratings from letterbox and create them
+        movie_names, movie_slugs, movie_ratings = scrap_letterboxd(letterboxd)
+
+        # First create the movie objects
+        movies = []
+        for i in range(len(movie_slugs)):
+            movies.append(Movie(movie_id=movie_slugs[i], movie_title=movie_names[i], ratings=[]))
 
         # Create User
         new_user = create_user(email, username, password, letterboxd)
 
+        ratings = []
+        # finally, create ratings
+        for i in range(len(movie_slugs)):
+            ratings.append(create_rating(new_user, movies[i], movie_ratings[i] / 2))
+
+        db.session.add_all(movies)
+        db.session.add_all(ratings)
         db.session.add(new_user)
         db.session.commit()
 

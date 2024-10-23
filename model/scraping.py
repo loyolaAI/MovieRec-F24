@@ -14,7 +14,8 @@ def scrap_letterboxd(username: str):
 
     # Initialize the regular expressions which will scan the soup file
     # for all of the movie names and star ratings.
-    regex_movie_names = re.compile(r'data-film-slug="([^"]+)"')
+    regex_movie_names = re.compile(r'alt="([^"]+)"')
+    regex_movie_slugs = re.compile(r'data-film-slug="([^"]+)"')
     regex_movie_ratings = re.compile(r"rated-(\d+)")
 
     # Make the soup to pull everything off the users letterboxd webpage.
@@ -26,6 +27,7 @@ def scrap_letterboxd(username: str):
     # Now, using regex, we get all the movie names and ratings from the HTML file.
     # This automatically creates a list for each variable.
     movie_names = re.findall(regex_movie_names, str(film_html))
+    movie_slugs = re.findall(regex_movie_slugs, str(film_html))
     movie_ratings = re.findall(regex_movie_ratings, str(film_html))
 
     """ Now we're going to remove the movies from the users letterbox'd that don't
@@ -41,7 +43,8 @@ def scrap_letterboxd(username: str):
     film_html_no_reviews = soup.find_all("li", class_=re.compile(r"poster-container"))
 
     # Get the list of all the removed movies.
-    removed_movie_names = re.findall(r'data-film-slug="([^"]+)"', str(film_html_no_reviews))
+    removed_movie_names = re.findall(r'alt="([^"]+)"', str(film_html_no_reviews))
+    removed_movie_slugs = re.findall(r'data-film-slug="([^"]+)"', str(film_html_no_reviews))
 
     """ Loop over all the movies we found, and remove them so that
     len(movie_names) == len(movie_ratings) and we don't have movies without ratings
@@ -49,15 +52,17 @@ def scrap_letterboxd(username: str):
     We wont need this when we scrape all the movies instead of
     only the first page. """
     movie_names = [movie for movie in movie_names if movie not in removed_movie_names]
+    movie_slugs = [movie for movie in movie_slugs if movie not in removed_movie_slugs]
+    movie_ratings = [int(rating) for rating in movie_ratings]
 
     # Return the results
-    return movie_names, movie_ratings
+    return movie_names, movie_slugs, movie_ratings
 
 
 # Method to scrape a given letterboxd username and return a dataframe with the movie names and the star ratings.
 def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
     # Scrap the movies and ratings from the given letterboxd username
-    (movie_name, movie_rating) = scrap_letterboxd(username)
+    (movie_name, movie_slugs, movie_rating) = scrap_letterboxd(username)
 
     # Convert the ratings from string to integer using list comprehension
     int_movie_ratings = [int(i.split()[0]) for i in movie_rating]
@@ -67,7 +72,12 @@ def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
 
     # Return the results as a Pandas dataframe
     return pd.DataFrame(
-        {"user_name": username_list, "film_id": movie_name, "rating": int_movie_ratings}
+        {
+            "user_name": username_list,
+            "film_id": movie_slugs,
+            "Movie_name": movie_name,
+            "rating": int_movie_ratings,
+        }
     )
 
 
