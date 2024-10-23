@@ -514,3 +514,17 @@ main {
     }
   }
 }
+
+.notification {
+  margin: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: var(--primary);
+  color: white;
+  box-shadow: 0 10px 20px -20px gray;
+  z-index: 1000;
+}
+
+.notification.is-danger {
+  background-color: var(--destructive);
+}

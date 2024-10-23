@@ -12,8 +12,8 @@
 <div class="container auth-page-container" style="gap: 0.5rem; z-index: 1;">
   {% with messages = get_flashed_messages() %}
   {% if messages %}
-      <div class="notification is-danger">
-          Error: {{ messages[0] }}
+      <div class="notification">
+          {{ messages[0] }}
       </div>
   {% endif %}
   {% endwith %}
