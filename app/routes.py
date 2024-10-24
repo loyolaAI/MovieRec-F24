@@ -15,7 +15,7 @@ from app.db_models.movie import Movie
 from app.db_models.movie_rating import MovieRating
 
 from app.functions.user_actions import (
-    create_rating,
+    scrap_user_ratings,
     create_user,
     update_password,
     send_password_reset_email,
@@ -84,6 +84,14 @@ def init_routes(app):
         User.get_by_email(current_user.email).delete_image()
         return jsonify({"Status": 200, "Message": "Image deleted successfully"})
 
+    @app.route("/scrap-letterboxd", methods=["POST"])
+    @login_required
+    def scrap_letterboxd():
+        scrap_user_ratings(current_user)
+        db.session.commit()
+
+        return redirect(url_for("home"))
+
     @app.route("/signup")
     def signup():
         return render_template("signup.html")
@@ -101,24 +109,12 @@ def init_routes(app):
             flash("Error: Email address already exists")
             return redirect(url_for("signup"))
 
-        # Fetch user ratings from letterbox and create them
-        movie_names, movie_slugs, movie_ratings = scrap_letterboxd(letterboxd)
-
-        # First create the movie objects
-        movies = []
-        for i in range(len(movie_slugs)):
-            movies.append(Movie(movie_id=movie_slugs[i], movie_title=movie_names[i], ratings=[]))
-
         # Create User
         new_user = create_user(email, username, password, letterboxd)
 
-        ratings = []
-        # finally, create ratings
-        for i in range(len(movie_slugs)):
-            ratings.append(create_rating(new_user, movies[i], movie_ratings[i] / 2))
+        # Scrap User Ratings, this function adds the ratings to the user object and DB
+        scrap_user_ratings(new_user)
 
-        db.session.add_all(movies)
-        db.session.add_all(ratings)
         db.session.add(new_user)
         db.session.commit()
 
