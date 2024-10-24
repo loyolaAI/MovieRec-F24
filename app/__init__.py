@@ -1,6 +1,7 @@
 from flask import Flask  # type: ignore
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass  # type: ignore
 from flask_sqlalchemy import SQLAlchemy  # type: ignore
+from flask_migrate import Migrate  # type: ignore
 from flask_login import LoginManager  # type: ignore
 
 from app.exceptions import init_exception_handler
@@ -11,7 +12,7 @@ class Base(DeclarativeBase, MappedAsDataclass):
 
 
 db = SQLAlchemy(model_class=Base)
-
+migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
@@ -23,6 +24,7 @@ def create_app():
     from .routes import init_routes
 
     db.init_app(app)
+    migrate.init_app(app, db)
 
     from app.db_models.user import User
     from app.db_models.movie_rating import MovieRating
