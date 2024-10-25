@@ -197,5 +197,27 @@ def init_routes(app):
 
         flash("Password updated successfully.")
         return redirect(url_for("login"))
+    
+    @app.route("/send-reset-email", methods=["POST"])
+    def send_reset_email():
+        email = request.form.get("email")
+        user = User.get_by_email(email)
+        if user is None:
+            flash("Error: User not found.")
+            return redirect(url_for("reset_password"))
+        reset_token = []
+        if not user.reset_token:
+            reset_token.append(Pass.create_reset_token(user))
+        elif user.reset_token:
+            if user.reset_token.expires_at > datetime.now():
+                Pass.delete_reset_token(user.reset_token)
+                reset_token.append(Pass.create_reset_token(user))
+            elif user.reset_token.expires_at < datetime.now():
+                reset_token.append(Pass.create_reset_token(user))
+        db.session.add(reset_token[0])
+        db.session.commit()
+        send_password_reset_email(user, reset_token[0])
+        flash("Password reset email sent successfully.")
+        return redirect(url_for("reset_password"))
 
     # ================== Authentication Related ==================
