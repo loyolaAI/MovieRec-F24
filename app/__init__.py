@@ -3,6 +3,12 @@ from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass  # type: ignore
 from flask_sqlalchemy import SQLAlchemy  # type: ignore
 from flask_migrate import Migrate  # type: ignore
 from flask_login import LoginManager  # type: ignore
+from dotenv import load_dotenv
+import os
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parent.parent / '.env'  # Adjusting to point to the .env file
+load_dotenv(dotenv_path=env_path)
 
 from app.exceptions import init_exception_handler
 
@@ -17,14 +23,18 @@ migrate = Migrate()
 def create_app():
     app = Flask(__name__)
 
-    app.config["SECRET_KEY"] = "d2d2ad7660c18bdc8fc43e835c05a5f4928489eb0490aa00b862f2e1e7b74e15"
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
+    pSQL_URL = os.environ.get("POSTGRESQL_URL")
+    if pSQL_URL is None:
+        raise ValueError("POSTGRESQL_URL environment variable not set.")
 
-    from .routes import init_routes
+    # app.config["SECRET_KEY"] = 
+    app.config["SQLALCHEMY_DATABASE_URI"] = pSQL_URL
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
     migrate.init_app(app, db)
+    
+    from .routes import init_routes
 
     from app.db_models.user import User
     from app.db_models.movie_rating import MovieRating
