@@ -25,6 +25,8 @@ def create_app():
     """Application factory function to initialize the Flask app."""
     app = Flask(__name__)
 
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+
     # Load the database URL from environment variables
     pSQL_URL = os.getenv("POSTGRESQL_URL")
     if not pSQL_URL:
