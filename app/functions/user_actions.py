@@ -2,11 +2,15 @@ from werkzeug.security import generate_password_hash
 from app.db_models.user import User
 from app.db_models.password_reset_token import PasswordResetToken as Pass
 from app import db
+from sendgrid import SendGridAPIClient, SendGridException
 
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+if not os.getenv("SENDGRID_API_KEY"):
+    raise ValueError("SENDGRID_API_KEY is not set.")
 
 from typing import Callable
 from cuid2 import cuid_wrapper  # type: ignore
@@ -55,9 +59,13 @@ def send_password_reset_email(user: User, token: Pass) -> None:
         subject="LAIC MovieRec Password Reset",
         html_content=construct_reset_password_email(token),
     )
+    try:
+        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+        response = sg.send(message)
+        print(f"Email sent with status code {response.status_code}")
+    except SendGridException as e:
+        print(f"Error sending email: {e}")
 
-    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-    sg.send(message)
 
 
 def construct_reset_password_email(token):
