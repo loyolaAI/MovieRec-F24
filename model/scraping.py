@@ -5,6 +5,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import json
 
 
 # Method to scrape a given users letterboxd profile and get information about the users movies and ratings
@@ -55,17 +56,29 @@ def scrap_letterboxd(username: str):
     movie_slugs = [movie for movie in movie_slugs if movie not in removed_movie_slugs]
     movie_ratings = [int(rating) for rating in movie_ratings]
 
+    # Get the images for the movies
+    # Lowkey stole this code from https://stackoverflow.com/questions/73803684/trying-to-scrape-posters-from-letterboxd-python
+    movie_images = []
+    for movie in movie_slugs:
+        url = f"https://letterboxd.com/film/{movie}/"
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        script_w_data = soup.select_one('script[type="application/ld+json"]')
+        json_obj = json.loads(script_w_data.text.split(" */")[1].split("/* ]]>")[0])
+        movie_images.append(json_obj["image"])
+
     # Return the results
-    return movie_names, movie_slugs, movie_ratings
+    return movie_names, movie_slugs, movie_ratings, movie_images
 
 
 # Method to scrape a given letterboxd username and return a dataframe with the movie names and the star ratings.
 def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
     # Scrap the movies and ratings from the given letterboxd username
-    (movie_name, movie_slugs, movie_rating) = scrap_letterboxd(username)
+    (movie_name, movie_slugs, movie_rating, movie_images) = scrap_letterboxd(username)
 
     # Convert the ratings from string to integer using list comprehension
-    int_movie_ratings = [int(i.split()[0]) for i in movie_rating]
+    int_movie_ratings = [int(i) for i in movie_rating]
 
     # Make a list of size (movie_name) for the usernames, Not necessary just included it
     username_list = [username] * len(movie_name)
@@ -77,6 +90,7 @@ def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
             "film_id": movie_slugs,
             "Movie_name": movie_name,
             "rating": int_movie_ratings,
+            "image": movie_images,
         }
     )
 

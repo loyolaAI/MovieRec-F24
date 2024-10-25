@@ -75,7 +75,9 @@ def send_password_reset_email(user: User, token: Pass) -> None:
 
 
 def scrap_user_ratings(user: User) -> None:
-    movie_names, movie_slugs, movie_ratings = scrap_letterboxd(user.letterboxd_username)
+    movie_names, movie_slugs, movie_ratings, movie_images = scrap_letterboxd(
+        user.letterboxd_username
+    )
 
     # First create the movie objects for any movies that haven't been scraped yet
     movies = []
@@ -89,7 +91,14 @@ def scrap_user_ratings(user: User) -> None:
         # Then check if anyone else has rated the movie
         movie = Movie.query.filter_by(movie_id=movie_slugs[i]).first()
         if movie is None:
-            movies.append(Movie(movie_id=movie_slugs[i], movie_title=movie_names[i], ratings=[]))
+            movies.append(
+                Movie(
+                    movie_id=movie_slugs[i],
+                    movie_title=movie_names[i],
+                    ratings=[],
+                    movie_image=movie_images[i],
+                )
+            )
         else:
             movies.append(movie)
 
@@ -98,6 +107,7 @@ def scrap_user_ratings(user: User) -> None:
         del movie_names[i]
         del movie_slugs[i]
         del movie_ratings[i]
+        del movie_images[i]
 
     ratings = []
     # Finally, create ratings

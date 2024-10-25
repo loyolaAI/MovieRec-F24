@@ -8,6 +8,9 @@ class Movie(db.Model):
 
     movie_id: Mapped[str] = mapped_column(primary_key=True)
     movie_title: Mapped[str] = mapped_column(nullable=False)
+    movie_image: Mapped[str] = mapped_column(
+        nullable=False, server_default="https://v0.dev/placeholder.svg"
+    )
 
     # Back reference to MovieRating
     ratings: Mapped[list["MovieRating"]] = relationship("MovieRating", back_populates="movie")  # type: ignore
