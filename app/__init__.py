@@ -37,8 +37,8 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize extensions
-    db.init_app(app)
-    migrate.init_app(app, db)
+    # db.init_app(app)
+    # migrate.init_app(app, db)
 
     # Set up login management
     login_manager = LoginManager()
@@ -62,7 +62,7 @@ def create_app():
     from app.db_models.password_reset_token import PasswordResetToken
 
     # Create database tables if they don't exist
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
     return app
