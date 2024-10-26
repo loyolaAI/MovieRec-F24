@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy  # type: ignore
 from flask_migrate import Migrate  # type: ignore
 from flask_login import LoginManager  # type: ignore
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass  # type: ignore
+from sqlalchemy import create_engine  # type: ignore
 
 from app.exceptions import init_exception_handler
 
@@ -37,8 +38,8 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize extensions
-    # db.init_app(app)
-    # migrate.init_app(app, db)
+    db.init_app(app)
+    migrate.init_app(app, db)
 
     # Set up login management
     login_manager = LoginManager()
@@ -62,7 +63,7 @@ def create_app():
     from app.db_models.password_reset_token import PasswordResetToken
 
     # Create database tables if they don't exist
-    # with app.app_context():
-    #     db.create_all()
+    with app.app_context():
+        db.create_all()
 
     return app
