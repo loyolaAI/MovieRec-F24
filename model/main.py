@@ -6,7 +6,9 @@ from scraping import scrape_and_make_dataframe
 
 def main():
     # Get the accuracy to see how much data we want to use for the model and recommendations.
-    accuracy = float(input("How accurate do you want the model to be (range 0.01-1.0) "))
+    accuracy = float(
+        input("How accurate do you want the model to be (range 0.01-1.0) ")
+    )
 
     # Call get_movie_dataframe to get all the user data and ratings to make recommendations.
     df = get_movie_dataframe(accuracy)

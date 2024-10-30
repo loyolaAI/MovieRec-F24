@@ -31,7 +31,9 @@ def build_colab_model(df, user_data, accuracy=0.1):
     recommendations, but doesn't take too long """
 
     # concatenate all of the ratings with the users ratings
-    df = pd.concat([df, user_data[["user_name", "film_id", "rating"]]], axis=0, ignore_index=True)
+    df = pd.concat(
+        [df, user_data[["user_name", "film_id", "rating"]]], axis=0, ignore_index=True
+    )
 
     # Load all of the data into the surprise Dataset library using the scale from
     # 1 to 10, 1 being a .5 star rating and 10 being a 5 star rating
@@ -51,7 +53,7 @@ def build_colab_model(df, user_data, accuracy=0.1):
     except Exception as e:
         print(f"Error during model training: {e}")
         raise
-    
+
     # Return the trained SVD algorithm
     return algo
 
@@ -69,6 +71,7 @@ if __name__ == "__main__":
     # just using sample accuracy and user data, for proof of concept
     accuracy = 0.05
     from get_user_data import get_movie_dataframe
+
     df = get_movie_dataframe(accuracy)
 
     if len(df) < 2:
@@ -77,7 +80,7 @@ if __name__ == "__main__":
         raise ValueError("Input dataframe is empty.")
     if df.isnull().values.any():
         raise ValueError("Data contains NaN values.")
-    
+
     user_data = pd.read_csv("./data/sample_user_data.csv")
     algo = build_colab_model(df, user_data, accuracy)
     print(f"algo = {algo}")

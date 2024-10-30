@@ -39,7 +39,10 @@ def run_colab_model(algo, user_data, movies, accuracy, username, num_recs=25):
 
     # Define the returns object which is a list of dictionaries, the dictionary stores the film_id, the initial
     # predicted rating, and then the unclipped rating, which is explained below
-    res = [{"film_id": x[0], "predicted_rating": x[1], "unclipped_rating": x[1]} for x in top_recs]
+    res = [
+        {"film_id": x[0], "predicted_rating": x[1], "unclipped_rating": x[1]}
+        for x in top_recs
+    ]
 
     """ Because we clip the rating in the range 1-10, to match the star ratings, if we have a rating that is 
         equal to 10, we need to repredict to see what the unclipped rating is for the given movie. For most 

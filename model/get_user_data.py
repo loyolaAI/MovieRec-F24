@@ -5,6 +5,7 @@ import pandas as pd
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RATINGS_DIR = os.path.join(BASE_DIR, "../model/data/ratings")
 
+
 def get_movie_info(user_data: pd.DataFrame) -> pd.DataFrame:
     """
     When scraping someone's Letterboxd, we only get the movie name and rating.
@@ -14,7 +15,9 @@ def get_movie_info(user_data: pd.DataFrame) -> pd.DataFrame:
     print("hello from get_movie_info")
 
 
-def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame, accuracy: float) -> list:
+def get_unwatched_movies(
+    user_data: pd.DataFrame, movies: pd.DataFrame, accuracy: float
+) -> list:
     """
     Recommends movies by taking all unwatched movies and putting them into a model.
     This function extracts movies the user hasn't seen from the CSV.
