@@ -38,19 +38,19 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Initialize extensions
-    db.init_app(app)
-    migrate.init_app(app, db)
+    # db.init_app(app)
+    # migrate.init_app(app, db)
 
     # Set up login management
-    login_manager = LoginManager()
-    login_manager.login_view = "login"
-    login_manager.init_app(app)
+    # login_manager = LoginManager()
+    # login_manager.login_view = "login"
+    # login_manager.init_app(app)
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        """Load a user by their ID."""
-        from app.db_models.user import User
-        return User.query.get(str(user_id))
+    # @login_manager.user_loader
+    # def load_user(user_id):
+    #     """Load a user by their ID."""
+    #     from app.db_models.user import User
+    #     return User.query.get(str(user_id))
 
     # Register routes and exception handlers
     from .routes import init_routes
@@ -58,12 +58,12 @@ def create_app():
     init_exception_handler(app)
 
     # Import database models to ensure they are registered
-    from app.db_models.user import User
-    from app.db_models.movie_rating import MovieRating
-    from app.db_models.password_reset_token import PasswordResetToken
+    # from app.db_models.user import User
+    # from app.db_models.movie_rating import MovieRating
+    # from app.db_models.password_reset_token import PasswordResetToken
 
     # Create database tables if they don't exist
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
     return app
