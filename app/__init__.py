@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy  # type: ignore
 from flask_login import LoginManager  # type: ignore
 
 from app.exceptions import init_exception_handler
+import os
 
 
 class Base(DeclarativeBase, MappedAsDataclass):
@@ -17,7 +18,7 @@ def create_app():
     app = Flask(__name__)
 
     app.config["SECRET_KEY"] = "d2d2ad7660c18bdc8fc43e835c05a5f4928489eb0490aa00b862f2e1e7b74e15"
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 
     from .routes import init_routes
