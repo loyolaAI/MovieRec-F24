@@ -5,8 +5,8 @@ from datetime import datetime
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../model')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../app')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../model")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../app")))
 
 import model.data.ratings as ratings
 from model.get_user_data import get_movie_dataframe
@@ -55,7 +55,10 @@ def init_routes(app):
 
             # Prepare the response with movie names and ratings
             rec_list = [
-                {"movie_name": rec["film_id"], "rating": round(rec["unclipped_rating"], 2)}
+                {
+                    "movie_name": rec["film_id"],
+                    "rating": round(rec["unclipped_rating"], 2),
+                }
                 for rec in recommendations
             ]
 
@@ -64,6 +67,7 @@ def init_routes(app):
         except Exception as e:
             # Handle errors and return a message
             return jsonify({"error": str(e)}), 500
+
     # Fetch Movie Data
     @app.route("/movie/<int:movie_id>", methods=["GET"])
     def fetch_movie_data(movie_id):
@@ -230,7 +234,7 @@ def init_routes(app):
 
         flash("Password updated successfully.")
         return redirect(url_for("login"))
-    
+
     @app.route("/send-reset-email", methods=["POST"])
     def send_reset_email():
         email = request.form.get("email")

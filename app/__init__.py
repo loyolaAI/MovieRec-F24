@@ -14,13 +14,16 @@ from app.exceptions import init_exception_handler
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
+
 # Define a base class for SQLAlchemy models
 class Base(DeclarativeBase, MappedAsDataclass):
     pass
 
+
 # Initialize database and migration instances
 db = SQLAlchemy(model_class=Base)
 migrate = Migrate()
+
 
 def create_app():
     """Application factory function to initialize the Flask app."""
@@ -54,6 +57,7 @@ def create_app():
 
     # Register routes and exception handlers
     from .routes import init_routes
+
     init_routes(app)
     init_exception_handler(app)
 

@@ -67,7 +67,6 @@ def send_password_reset_email(user: User, token: Pass) -> None:
         print(f"Error sending email: {e}")
 
 
-
 def construct_reset_password_email(token):
     username = token.user.username
     reset_token = token.token
