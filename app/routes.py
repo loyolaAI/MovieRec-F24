@@ -30,7 +30,7 @@ def init_routes(app):
     @app.route("/")
     @login_required
     def home():
-        return render_template("index.html")
+        return render_template("index.html", movies=User.get_rated_movies(current_user))
 
     # Recommendation
     @app.route("/recommend", methods=["POST"])

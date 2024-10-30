@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main class="col-span-7">
-  {{ current_user }}
+<main class="col-span-7 flex gap-4 flex-shrink-0 overflow-x-auto p-4">
+  {% for movie in movies %}
+    <div class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
+      <img src="{{ movie['movie_image'] }}" class="rounded-2xl"/>
+      <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col gap-2 p-4">
+        <h2 class="text-lg font-bold mt-4">{{ movie['movie_title'] }}</h2>
+      </div>
+    </div>
+  {% endfor %}
 </main>
 {% endblock %}

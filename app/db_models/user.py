@@ -89,3 +89,9 @@ class User(UserMixin, db.Model):
             if rating.movie_id == movie_id:
                 return rating
         return None
+
+    def get_rated_movies(self) -> list["MovieRating"]:
+        movies = []
+        for rating in self.ratings:
+            movies.append(rating.movie)
+        return movies

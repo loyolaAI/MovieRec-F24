@@ -6,6 +6,10 @@ from flask_login import LoginManager  # type: ignore
 from app.exceptions import init_exception_handler
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 class Base(DeclarativeBase, MappedAsDataclass):
     pass
