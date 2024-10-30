@@ -31,9 +31,7 @@ def build_colab_model(df, user_data, accuracy=0.1):
     recommendations, but doesn't take too long """
 
     # concatenate all of the ratings with the users ratings
-    df = pd.concat(
-        [df, user_data[["user_name", "film_id", "rating"]]], axis=0, ignore_index=True
-    )
+    df = pd.concat([df, user_data[["user_name", "film_id", "rating"]]], axis=0, ignore_index=True)
 
     # Load all of the data into the surprise Dataset library using the scale from
     # 1 to 10, 1 being a .5 star rating and 10 being a 5 star rating

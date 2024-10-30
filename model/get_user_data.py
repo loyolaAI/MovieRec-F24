@@ -15,9 +15,7 @@ def get_movie_info(user_data: pd.DataFrame) -> pd.DataFrame:
     print("hello from get_movie_info")
 
 
-def get_unwatched_movies(
-    user_data: pd.DataFrame, movies: pd.DataFrame, accuracy: float
-) -> list:
+def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame, accuracy: float) -> list:
     """
     Recommends movies by taking all unwatched movies and putting them into a model.
     This function extracts movies the user hasn't seen from the CSV.
@@ -29,9 +27,7 @@ def get_movie_dataframe(accuracy: float) -> pd.DataFrame:
     total_needed_rows = int(total_len * accuracy)  # Calculate needed rows
 
     # List of absolute paths to the ratings files
-    zipped_csv_files = [
-        os.path.join(RATINGS_DIR, f"ratings{i}.csv.gz") for i in range(1, 5)
-    ]
+    zipped_csv_files = [os.path.join(RATINGS_DIR, f"ratings{i}.csv.gz") for i in range(1, 5)]
 
     dfs = []  # Store each chunk of data
     rows_read = 0  # Track how many rows have been read
