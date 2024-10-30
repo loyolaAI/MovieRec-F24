@@ -9,24 +9,35 @@ import pandas as pd
 
 # Method to scrape a given users letterboxd profile and get information about the users movies and ratings
 def scrap_letterboxd(username: str):
-    # Given the username, create the letterboxd url so we can scrap the movies
-    url = "https://letterboxd.com/" + username.strip() + "/films/by/rated-date-earliest/page/1"
+    page_number = 1
+    movie_names = []
+    movie_ratings = []
+    while True:
+        # Given the username, create the letterboxd url so we can scrap the movies
+        url = "https://letterboxd.com/" + username.strip() + "/films/page/" + str(page_number) + "/"
+        response = requests.get(url)
 
-    # Initialize the regular expressions which will scan the soup file
-    # for all of the movie names and star ratings.
-    regex_movie_names = re.compile(r'data-film-slug="([^"]+)"')
-    regex_movie_ratings = re.compile(r"rated-(\d+)")
+        # Initialize the regular expressions which will scan the soup file
+        # for all of the movie names and star ratings.
+        regex_movie_names = re.compile(r'data-film-slug="([^"]+)"')
+        regex_movie_ratings = re.compile(r"rated-(\d+)")
 
-    # Make the soup to pull everything off the users letterboxd webpage.
-    soup = BeautifulSoup(requests.get(url).text, "html.parser")
+        # Make the soup to pull everything off the users letterboxd webpage.
+        soup = BeautifulSoup(requests.get(url).text, "html.parser")
 
-    # Now find everything from only the actual movie section of the webpage, not the other info
-    film_html = soup.find_all("li", class_=re.compile(r"poster-container"))
+        # Now find everything from only the actual movie section of the webpage, not the other info
+        film_html = soup.find_all("li", class_=re.compile(r"poster-container"))
 
-    # Now, using regex, we get all the movie names and ratings from the HTML file.
-    # This automatically creates a list for each variable.
-    movie_names = re.findall(regex_movie_names, str(film_html))
-    movie_ratings = re.findall(regex_movie_ratings, str(film_html))
+        # If there aren't any films found, break out of the loop
+        if not film_html:
+            break
+
+        # Now, using regex, we get all the movie names and ratings from the HTML file.
+        # This automatically creates a list for each variable.
+        movie_names += re.findall(regex_movie_names, str(film_html))
+        movie_ratings += re.findall(regex_movie_ratings, str(film_html))
+
+        page_number += 1
 
     """ Now we're going to remove the movies from the users letterbox'd that don't
         have a rating associated with them. Because it won't add to the model and
