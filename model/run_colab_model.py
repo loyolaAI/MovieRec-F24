@@ -1,10 +1,13 @@
 import pandas as pd
 import random
 
+# update
+
 from build_colab_model import build_colab_model
 from scraping import scrape_and_make_dataframe
 
 
+# Define function to get top recommendations
 def get_top_recs(predictions, num_recs):
     # top_n is a list of tuples that has the movie name and the predicted rating
     top_n = [(iid, est) for uid, iid, true_r, est, _ in predictions]
@@ -14,18 +17,36 @@ def get_top_recs(predictions, num_recs):
     return top_n[:num_recs]
 
 
-def run_colab_model(algo, user_data, movies, accuracy, username, num_recs=25):
-    """We need to get all the movies the user has not watched"""
-    # Get a set of movie IDs that the user has already watched
+# Updated run_colab_model with 'obscureness' parameter
+def run_colab_model(algo, user_data, movies, accuracy, username, num_recs=25, obscureness=9):
+    """Recommend movies to user while filtering by popularity based on obscureness"""
+
+    # Define popularity thresholds for different obscureness levels
+    popularity_thresholds_samples = [150, 250, 500, 750, 1100, 1500, 2000, 2500, 3000, 3500]
+    # defines the threshold for the number of reviews, from very obscure movies (lower threshold) to very popular ones (higher threshold)
+
+    # Calculate the review count cutoff based on obscureness and accuracy
+    cutoff = popularity_thresholds_samples[obscureness] * accuracy
+    # determines the maximum number of reviews for a movie, allowing you to control how obscure or popular the recommendations should be
+
+    # Get review count for each movie
+    review_count_df = movies.groupby("film_id").size().reset_index(name="rating_count")
+    # gets the list of movies with review counts under the calculated cutoff, filtering out highly-reviewed popular movies.
+
+    # Filter movies by review count according to cutoff
+    obscure_movies = review_count_df[review_count_df["rating_count"] <= cutoff]["film_id"]
+
+    # Set of movies that the user has already watched
     watched_movies = set(user_data["film_id"].unique())
 
-    # Get a set of all movie IDs
-    all_movies = set(movies["film_id"].unique())
+    # Set of all movie IDs with obscureness filter applied
+    all_movies = set(obscure_movies)
 
-    # Get the difference: movies the user hasn't watched
+    # Find movies the user has not watched that meet the obscureness criteria
     unwatched_movies = list(all_movies - watched_movies)
+    # includes only those movies that have review counts below the cutoff, ensuring more obscure recommendations
 
-    # Create the prediction set which will hold a given users film and the predicted rating for it.
+    # Create the prediction set for all the user's unwatched obscure movies
     prediction_set = [(username, film_id, 0) for film_id in unwatched_movies]
 
     # Feed the prediction_set into the model. This returns a list of type
@@ -47,10 +68,10 @@ def run_colab_model(algo, user_data, movies, accuracy, username, num_recs=25):
     for i, prediction in enumerate(res):
         if prediction["predicted_rating"] == 10:
             res[i]["unclipped_rating"] = float(
-                algo.predict(username, prediction["movie_id"], clip=False).est
+                algo.predict(username, prediction["film_id"], clip=False).est
             )
 
-    # Sort the return array by the unclipped rating, and then return
+    # Sort by unclipped rating in descending order
     res.sort(key=lambda x: (x["unclipped_rating"]), reverse=True)
 
     return res
@@ -73,7 +94,7 @@ if __name__ == "__main__":
     algo = build_colab_model(df, user_data, accuracy)
 
     # Run the collaborative based model and return the recommendations
-    recs = run_colab_model(algo, user_data, df, accuracy, "nathannjohnson", 20)
+    recs = run_colab_model(algo, user_data, df, accuracy, "nathannjohnson", 20, obscureness=3)
 
     # Print the recommended items for the user
     for rec in recs:

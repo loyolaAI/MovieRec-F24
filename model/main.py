@@ -21,8 +21,12 @@ def main():
     # build the collaborative based model and return
     algo = build_colab_model(df, user_data, accuracy)
 
+    obscureness = int(
+        input("How 'obscure' do you want the recommendations to be (0-9) 0 being obscure ")
+    )
+
     # Run the collaborative based model and return the recommendations
-    recs = run_colab_model(algo, user_data, df, accuracy, username, number_recs)
+    recs = run_colab_model(algo, user_data, df, accuracy, username, number_recs, obscureness)
 
     # Print the recommended items for the user
     for rec in recs:
