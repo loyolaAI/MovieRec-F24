@@ -1,6 +1,9 @@
 from werkzeug.security import generate_password_hash
 from app.db_models.user import User
+from app.db_models.movie import Movie
+from app.db_models.movie_rating import MovieRating
 from app.db_models.password_reset_token import PasswordResetToken as Pass
+from model.scraping import scrap_letterboxd
 from app import db
 
 import os
@@ -31,6 +34,17 @@ def create_user(email: str, username: str, password: str, letterboxd: str) -> Us
     )
 
 
+def create_rating(user: User, movie: Movie, rating: int) -> MovieRating:
+    return MovieRating(
+        id=cuid_generator(),
+        movie_id=movie.movie_id,
+        movie=movie,
+        _rating=rating,
+        user_id=user.id,
+        user=user,
+    )
+
+
 def update_user(user: User, username: str, email: str, letterboxd: str, *imgData: dict) -> None:
     user.email = email
     user.username = username
@@ -58,6 +72,52 @@ def send_password_reset_email(user: User, token: Pass) -> None:
 
     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
     sg.send(message)
+
+
+def scrap_user_ratings(user: User) -> None:
+    movie_names, movie_slugs, movie_ratings, movie_images = scrap_letterboxd(
+        user.letterboxd_username
+    )
+
+    # First create the movie objects for any movies that haven't been scraped yet
+    movies = []
+    to_remove = []  # Track indices of movies to remove
+    for i in range(len(movie_slugs)):  # No need for len(movie_slugs) - 1
+        # Do nothing if user has already rated the movie
+        if user.has_rated_movie(movie_slugs[i]):
+            to_remove.append(i)  # Mark the index for removal
+            continue
+
+        # Then check if anyone else has rated the movie
+        movie = Movie.query.filter_by(movie_id=movie_slugs[i]).first()
+        if movie is None:
+            movies.append(
+                Movie(
+                    movie_id=movie_slugs[i],
+                    movie_title=movie_names[i],
+                    ratings=[],
+                    movie_image=movie_images[i],
+                )
+            )
+        else:
+            movies.append(movie)
+
+    # Remove rated movies from the lists (in reverse order to prevent shifting)
+    for i in sorted(to_remove, reverse=True):
+        del movie_names[i]
+        del movie_slugs[i]
+        del movie_ratings[i]
+        del movie_images[i]
+
+    ratings = []
+    # Finally, create ratings
+    for i in range(len(movie_slugs)):
+        ratings.append(
+            create_rating(user, movies[i], movie_ratings[i] / 2)
+        )  # Letterboxd ratings are out of 10, so divide by 2 to get a 5-star rating
+
+    db.session.add_all(movies)
+    db.session.add_all(ratings)
 
 
 def construct_reset_password_email(token):

@@ -19,7 +19,6 @@ joblib==1.4.2
 numpy==1.26.4
 pandas==2.2.2
 scikit-learn==1.5.2
-scipy==1.14.1
 python-dateutil==2.9.0.post0
 threadpoolctl==3.5.0
 tzdata==2024.1
@@ -36,3 +35,4 @@ beautifulsoup4==4.12.3
 sendgrid==6.11.0
 cloudinary==1.41.0
 python-dotenv==1.0.1
+gunicorn==23.0.0
