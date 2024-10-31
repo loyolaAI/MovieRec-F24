@@ -7,12 +7,15 @@ from app import db
 class MovieRating(db.Model):
     __tablename__ = "movie_ratings"
 
-    movie_id: Mapped[int] = mapped_column(primary_key=True)
-    movie_title: Mapped[str] = mapped_column(nullable=False)
+    id: Mapped[str] = mapped_column(primary_key=True)
+
+    movie_id: Mapped[str] = mapped_column(ForeignKey("movies.movie_id"), nullable=False)
+    movie: Mapped["Movie"] = relationship("Movie", back_populates="ratings")  # type: ignore
+
     _rating: Mapped[float] = mapped_column(nullable=False)
 
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
-    user: Mapped["User"] = relationship("User", backref="", back_populates="ratings")  # type: ignore
+    user: Mapped["User"] = relationship("User", back_populates="ratings")  # type: ignore
 
     @validates("_rating")
     def validate_rating(self, key, value):
