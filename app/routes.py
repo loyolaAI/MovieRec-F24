@@ -1,12 +1,12 @@
-from flask import request, jsonify, render_template, redirect, url_for, flash
+from flask import request, jsonify, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
 from datetime import datetime
+from model.scraping import scrape_letterboxd_movie
 
 import sys
 
 sys.path.append("..")
-
 
 from app.functions.movie_recommender import movie_recommendation
 from app.db_models.user import User
@@ -22,9 +22,6 @@ from app.functions.user_actions import (
     update_user,
 )
 from app import db
-
-from model.scraping import scrap_letterboxd
-
 
 def init_routes(app):
     @app.route("/")
@@ -43,13 +40,27 @@ def init_routes(app):
     def recent():
         return render_template("recent.html", movies=User.get_rated_movies(current_user))
 
-    # Fetch Movie Data
-    @app.route("/movie/<int:movie_id>", methods=["GET"])
-    def fetch_movie_data(movie_id):
-        # Validity Check
-        # Fetch using 'movie_data' function
-        # Throw exception if there is not movie data
-        return
+    @app.route("/movie_info/<movie_id>", methods=["GET"])
+    def movie_info(movie_id):
+        try:
+            print("movie_id:", movie_id)
+        
+            movie_data = scrape_letterboxd_movie(movie_id)
+            if not movie_data or not movie_data.get("title"):
+                return render_template("error.html", error="Movie data not found")
+            return render_template("movie_info.html", movie=movie_data)
+        except Exception as e:
+            print(e)
+            print("movie_id:", movie_id)
+            return render_template("error.html", error=e)
+
+    # # Fetch Movie Data
+    # @app.route("/movie/<int:movie_id>", methods=["GET"])
+    # def fetch_movie_data(movie_id):
+    #     # Validity Check
+    #     # Fetch using 'movie_data' function
+    #     # Throw exception if there is not movie data
+    #     return
 
     # Search For Movie(s)
     @app.route("/search", methods=["GET"])
