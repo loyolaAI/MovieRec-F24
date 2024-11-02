@@ -38,6 +38,10 @@ def init_routes(app):
         data = request.json
         recommendation = movie_recommendation([data["input"]])  # Adjust based on your input format
         return jsonify({"recommendations": recommendation.tolist()})
+    
+    @app.route("/recent", methods=["GET"])
+    def recent():
+        return render_template("recent.html", movies=User.get_rated_movies(current_user))
 
     # Fetch Movie Data
     @app.route("/movie/<int:movie_id>", methods=["GET"])
