@@ -1,4 +1,3 @@
-{% with auth = current_user %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
   <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>
-
   <link rel="stylesheet" href="{{ url_for('static', filename='styles/mainPage.css') }}">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -105,10 +103,9 @@
       document.querySelector(`[href="${pathname}"]`).classList.add('active');
     </script>
   {% endif %}
-
-  {% block content %}
-  
-  {% endblock %}
+      const username = document.getElementById('username').value;
+      const accuracy = parseFloat(document.getElementById('accuracy').value);
+      const count = parseInt(document.getElementById('count').value);
 
   {% if auth['is_authenticated'] %}
     <aside class="col-span-3 p-10 border-x border-gray-500">
@@ -146,9 +143,20 @@
         if (!dropdownTrigger.contains(e.target)) {
           dropdownInput.checked = false;
         }
-      });
-    </script>
-  {% endif %}
+
+        const moviesList = document.getElementById('movies-list');
+        moviesList.innerHTML = ''; // Clear previous recommendations
+
+        data.recommendations.forEach(movie => {
+          const li = document.createElement('li');
+          li.textContent = `${movie.movie_name} - ${movie.rating}`;
+          moviesList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Error fetching recommendations:', error);
+        alert('Failed to fetch recommendations. Please try again.');
+      }
+    });
+  </script>
 </body>
 </html>
-{% endwith %}

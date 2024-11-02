@@ -1,7 +1,12 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 from flask import Flask  # type: ignore
-from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass  # type: ignore
 from flask_sqlalchemy import SQLAlchemy  # type: ignore
+from flask_migrate import Migrate  # type: ignore
 from flask_login import LoginManager  # type: ignore
+from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass  # type: ignore
+from sqlalchemy import create_engine  # type: ignore
 
 from app.exceptions import init_exception_handler
 import os
@@ -10,43 +15,67 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Load environment variables from the .env file
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
+
+# Define a base class for SQLAlchemy models
 class Base(DeclarativeBase, MappedAsDataclass):
     pass
 
 
+# Initialize database and migration instances
 db = SQLAlchemy(model_class=Base)
+migrate = Migrate()
 
 
 def create_app():
+    """Application factory function to initialize the Flask app."""
     app = Flask(__name__)
 
-    app.config["SECRET_KEY"] = "d2d2ad7660c18bdc8fc43e835c05a5f4928489eb0490aa00b862f2e1e7b74e15"
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
-    from .routes import init_routes
+    # Load the database URL from environment variables
+    pSQL_URL = os.getenv("POSTGRESQL_URL")
+    if not pSQL_URL:
+        raise ValueError("POSTGRESQL_URL environment variable is not set.")
 
-    db.init_app(app)
+    # Configure app settings
+    app.config["SQLALCHEMY_DATABASE_URI"] = pSQL_URL
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     from app.db_models.user import User
     from app.db_models.movie_rating import MovieRating
     from app.db_models.password_reset_token import PasswordResetToken
     from app.db_models.movie import Movie
 
-    login_manager = LoginManager()
-    login_manager.login_view = "login"
-    login_manager.init_app(app)
+    # Set up login management
+    # login_manager = LoginManager()
+    # login_manager.login_view = "login"
+    # login_manager.init_app(app)
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        # since the user_id is just the primary key of our user table, use it in the query for the user
-        return User.query.get(str(user_id))
+    # @login_manager.user_loader
+    # def load_user(user_id):
+    #     """Load a user by their ID."""
+    #     from app.db_models.user import User
+    #     return User.query.get(str(user_id))
 
-    with app.app_context():
-        # db.drop_all()
-        db.create_all()
+    # Register routes and exception handlers
+    from .routes import init_routes
 
     init_routes(app)
     init_exception_handler(app)
+
+    # Import database models to ensure they are registered
+    # from app.db_models.user import User
+    # from app.db_models.movie_rating import MovieRating
+    # from app.db_models.password_reset_token import PasswordResetToken
+
+    # Create database tables if they don't exist
+    # with app.app_context():
+    #     db.create_all()
+
     return app

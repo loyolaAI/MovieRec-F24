@@ -1,0 +1,11 @@
+webscraping => pandas df
+movie + given rating
+=> data set, kaggle
+movies, username, rating
+18 million rows
+5% of data = 1 million
+csv is in repo
+method to expose csv -> 
+search movies ->
+main list of dictionaries
+run + build method = black box

@@ -5,11 +5,15 @@ from app.db_models.movie_rating import MovieRating
 from app.db_models.password_reset_token import PasswordResetToken as Pass
 from model.scraping import scrap_letterboxd
 from app import db
+from sendgrid import SendGridAPIClient, SendGridException
 
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+if not os.getenv("SENDGRID_API_KEY"):
+    raise ValueError("SENDGRID_API_KEY is not set.")
 
 from typing import Callable
 from cuid2 import cuid_wrapper  # type: ignore
@@ -69,9 +73,12 @@ def send_password_reset_email(user: User, token: Pass) -> None:
         subject="LAIC MovieRec Password Reset",
         html_content=construct_reset_password_email(token),
     )
-
-    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-    sg.send(message)
+    try:
+        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+        response = sg.send(message)
+        print(f"Email sent with status code {response.status_code}")
+    except SendGridException as e:
+        print(f"Error sending email: {e}")
 
 
 def scrap_user_ratings(user: User) -> None:
