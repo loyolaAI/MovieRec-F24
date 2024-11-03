@@ -152,9 +152,10 @@ def scrape_letterboxd_movie(movie_slug: str):
         )
 
         # Check for hidden-spoiler text first, then fallback to main body-text div
-        review_content_div = review.find("div", class_="hidden-spoilers expanded-text") or \
-                             review.find("div", class_="body-text -prose collapsible-text")
-        
+        review_content_div = review.find(
+            "div", class_="hidden-spoilers expanded-text"
+        ) or review.find("div", class_="body-text -prose collapsible-text")
+
         # Get all paragraphs within the selected review content and join them
         if review_content_div:
             paragraphs = review_content_div.find_all("p")

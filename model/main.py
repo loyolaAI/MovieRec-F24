@@ -6,7 +6,7 @@ from scraping import scrape_and_make_dataframe
 # def get_recommendations(username, accuracy=0.5, number_recs=5, obscureness=0):
 #     # Call get_movie_dataframe to get all the user data and ratings to make recommendations.
 #     df = get_movie_dataframe(accuracy)
-    
+
 #     # Scrape user data from Letterboxd
 #     user_data = scrape_and_make_dataframe(username)
 
@@ -17,6 +17,7 @@ from scraping import scrape_and_make_dataframe
 #     recs = run_colab_model(algo, user_data, df, accuracy, username, number_recs, obscureness)
 
 #     return recs
+
 
 def main():
     # Get the accuracy to see how much data we want to use for the model and recommendations.
