@@ -34,20 +34,25 @@ def main():
         rating = rec.get("unclipped_rating")
         print(f"{movie_name} {round(rating, 2)}")
 
-def get_recommendations(username, accuracy=0.5, number_recs=5, obscureness=0):
+def get_recommendations(username, accuracy=0.01, number_recs=20, obscureness=9):
     # Call get_movie_dataframe to get all the user data and ratings to make recommendations.
     df = get_movie_dataframe(accuracy)
+    print(f"Movie DataFrame:\n{df.head()}")  # Check the DataFrame
 
     # Scrape user data from Letterboxd
     user_data = scrape_and_make_dataframe(username)
+    print(f"User Data:\n{user_data}")  # Check the user data
 
     # Build the collaborative model
     algo = build_colab_model(df, user_data, accuracy)
+    print("Collaborative model built successfully.")
 
     # Run the collaborative model and return recommendations
     recs = run_colab_model(algo, user_data, df, accuracy, username, number_recs, obscureness)
+    print(f"Recommendations:\n{recs}")  # Check the recommendations
 
     return recs
+
 
 
 if __name__ == "__main__":
