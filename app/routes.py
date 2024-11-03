@@ -3,6 +3,7 @@ from flask_login import login_required, current_user, login_user, logout_user  #
 from werkzeug.security import check_password_hash
 from datetime import datetime
 from model.scraping import scrape_letterboxd_movie, scrap_letterboxd
+from model.main import get_recommendations
 
 import sys
 
@@ -30,12 +31,24 @@ def init_routes(app):
     def home():
         return render_template("index.html", movies=User.get_rated_movies(current_user))
 
-    # Recommendation
-    @app.route("/recommend", methods=["POST"])
-    def recommend():
-        data = request.json
-        recommendation = movie_recommendation([data["input"]])  # Adjust based on your input format
-        return jsonify({"recommendations": recommendation.tolist()})
+    # # Recommendation
+    # @app.route("/discover", methods=["POST"])
+    # def discover():
+    #     data = request.json
+    #     username = data.get("username")
+
+    #     # Ensure the username is provided
+    #     if not username:
+    #         return jsonify({"error": "Username is required"}), 400
+
+    #     try:
+    #         # Get recommendations using the refactored function
+    #         recommendations = get_recommendations(username)
+    #         formatted_recommendations = [{"movie_title": rec["film_id"], "movie_image": "default_image.jpg"} for rec in recommendations]
+    #         return render_template("discover.html", recommendations=formatted_recommendations)
+    #     except Exception as e:
+    #         print(f"Error generating recommendations: {e}")
+    #         return jsonify({"error": "Failed to generate recommendations"}), 500
 
     @app.route("/recent", methods=["GET"])
     def recent():
