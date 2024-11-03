@@ -30,10 +30,10 @@ def get_movie_dataframe(accuracy: float) -> pd.DataFrame:
 
     # List of CSV file paths
     zipped_csv_files = [
-        "./data/ratings/ratings1.csv.gz",
-        "./data/ratings/ratings2.csv.gz",
-        "./data/ratings/ratings3.csv.gz",
-        "./data/ratings/ratings4.csv.gz",
+        "model/data/ratings/ratings1.csv.gz",
+        "model/data/ratings/ratings2.csv.gz",
+        "model/data/ratings/ratings3.csv.gz",
+        "model/data/ratings/ratings4.csv.gz",
     ]
 
     # DataFrames list to store each chunk

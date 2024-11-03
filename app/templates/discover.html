@@ -1,18 +1,63 @@
 {% extends "base.html" %}
-{% block title %}Recommended Movies{% endblock %}
+{% block title %}Discover Movies{% endblock %}
 {% block content %}
 
-<main class="col-span-7 flex gap-4 flex-shrink-0 overflow-x-auto p-4">
-  {% for movie in recommendations %}
-    <div class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
-      <div class="p-4">
-          <h2 class="text-lg font-bold mt-4">{{ movie.movie_title }}</h2>
-          <p>Rating: {{ movie.rating }}</p>
-      </div>
-    </div>
-  {% else %}
-    <p>No recommendations available at this time.</p>
-  {% endfor %}
-</main>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Discover Movies - Movie Streaming Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/mainPage.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": 'var(--primary)',
+                        "primary-muted": "var(--primary-muted)",
+                        "secondary": "var(--secondary)",
+                        "secondary-muted": "var(--secondary-muted)",
+                        "destructive": "var(--destructive)"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <main>
+        <header>
+            <nav>
+                <a href="{{ url_for('home') }}" class="logo">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+                </a>
+            </nav>
+        </header>
+
+        <section class="content container mx-auto p-6">
+            <h1 class="text-2xl font-bold mb-6">Recommended Movies</h1>
+            <div class="col-span-7 flex flex-wrap gap-4">
+                {% for movie in recommendations %}
+                <div class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
+                    <img src="{{ movie.movie_image }}" alt="{{ movie.movie_title }}" class="rounded-2xl" />
+                    <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col gap-2 p-4">
+                        <h2 class="text-lg font-bold mt-4">{{ movie.movie_title }}</h2>
+                        <p class="text-sm">Rating: {{ movie.rating }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p>No recommendations available at this time.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>
 
 {% endblock %}

@@ -67,6 +67,6 @@ if __name__ == "__main__":
     from get_user_data import get_movie_dataframe
 
     df = get_movie_dataframe(accuracy)
-    user_data = pd.read_csv("./data/sample_user_data.csv")
+    user_data = pd.read_csv("model/data/sample_user_data.csv")
     algo = build_colab_model(df, user_data, accuracy)
     print(f"algo = {algo}")

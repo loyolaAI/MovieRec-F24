@@ -3,8 +3,8 @@ import random
 
 # update
 
-from build_colab_model import build_colab_model
-from scraping import scrape_and_make_dataframe
+from model.build_colab_model import build_colab_model
+from model.scraping import scrape_and_make_dataframe
 
 
 # Define function to get top recommendations
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     df = get_movie_dataframe(accuracy)
 
     # using sample data
-    user_data = pd.read_csv("./data/sample_user_data.csv")
+    user_data = pd.read_csv("model/data/sample_user_data.csv")
 
     # build the collaborative based model and return
     algo = build_colab_model(df, user_data, accuracy)
