@@ -83,6 +83,7 @@ def scrap_letterboxd(username: str):
     # Return the results
     return movie_names, movie_slugs, movie_ratings, movie_images
 
+
 def scrape_letterboxd_movie(movie_slug: str):
     """
     Scrapes details of a specific movie from Letterboxd using its slug.
@@ -95,50 +96,50 @@ def scrape_letterboxd_movie(movie_slug: str):
     """
     url = f"https://letterboxd.com/film/{movie_slug}/"
     response = requests.get(url)
-    
+
     if response.status_code != 200:
         raise Exception(f"Failed to retrieve data. Status code: {response.status_code}")
-    
+
     soup = BeautifulSoup(response.text, "html.parser")
-    
+
     # Extract JSON-LD data which contains movie details
     script_data = soup.select_one('script[type="application/ld+json"]')
     if not script_data:
         raise ValueError("Movie data not found on the page.")
-    
+
     # Get the content of the script and strip the CDATA tags
     raw_data = script_data.string
-    cleaned_data = re.sub(r'/\* <!\[CDATA\[ \*/|/\* \]\]> \*/', '', raw_data).strip()
-    
+    cleaned_data = re.sub(r"/\* <!\[CDATA\[ \*/|/\* \]\]> \*/", "", raw_data).strip()
+
     # Parse JSON data
     try:
         movie_data = json.loads(cleaned_data)
     except json.JSONDecodeError as e:
         print("Error decoding JSON:", str(e))
         return None
-    
+
     # Extract details from the JSON data
     title = movie_data.get("name", "Unknown Movie")
-    year_element = soup.find('a', href=re.compile(r'/films/year/\d{4}/'))
+    year_element = soup.find("a", href=re.compile(r"/films/year/\d{4}/"))
     year = year_element.text if year_element else "N/A"
 
     genres = movie_data.get("genre", [])
     director = movie_data.get("director", [{}])[0].get("name", "N/A")
     rating = movie_data.get("aggregateRating", {}).get("ratingValue", 0.0)
     poster_url = movie_data.get("image", "https://via.placeholder.com/150")
-    
+
     # Extract actors and create Wikipedia links for each
     actors = [
         {
             "name": actor["name"],
-            "wiki_url": f"https://en.wikipedia.org/wiki/{actor['name'].replace(' ', '_')}"
+            "wiki_url": f"https://en.wikipedia.org/wiki/{actor['name'].replace(' ', '_')}",
         }
         for actor in movie_data.get("actors", [])
     ]
 
     summary_tag = soup.find("meta", property="og:description")
     summary = summary_tag["content"] if summary_tag else "No summary available"
-    
+
     # Return the results in a dictionary
     return {
         "title": title,
@@ -148,7 +149,7 @@ def scrape_letterboxd_movie(movie_slug: str):
         "rating": rating,
         "actors": actors,
         "movie_image": poster_url,
-        "summary": summary
+        "summary": summary,
     }
 
 
