@@ -31,7 +31,9 @@
             </p>
             <p class="mb-2"><strong>Year:</strong> {{ movie.year }}</p>
             <p class="mb-2"><strong>Genres:</strong> {{ movie.genres | join(', ') }}</p>
-            <p class="mb-4"><strong>Director:</strong> {{ movie.director }}</p>
+            <p class="mb-4"><strong>Director:</strong> 
+                <a href="https://en.wikipedia.org/wiki/{{ movie.director.replace(' ', '_') }}" target="_blank" class="text-secondary hover:underline">{{ movie.director }}</a>
+            </p>
             <p><strong>Summary:</strong> {{ movie.summary }}</p>
             <br>
             <p class="mb-4">
