@@ -48,6 +48,7 @@ def init_routes(app):
             movie_data = scrape_letterboxd_movie(movie_id)
             if not movie_data or not movie_data.get("title"):
                 return render_template("error.html", error="Movie data not found")
+            print("Final movie data:", movie_data)
             return render_template("movie_info.html", movie=movie_data)
         except Exception as e:
             print(e)

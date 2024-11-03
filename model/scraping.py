@@ -83,11 +83,6 @@ def scrap_letterboxd(username: str):
     # Return the results
     return movie_names, movie_slugs, movie_ratings, movie_images
 
-import re
-import json
-import requests
-from bs4 import BeautifulSoup
-
 def scrape_letterboxd_movie(movie_slug: str):
     """
     Scrapes details of a specific movie from Letterboxd using its slug.
@@ -96,7 +91,7 @@ def scrape_letterboxd_movie(movie_slug: str):
     - movie_slug: The slug part of the movie URL on Letterboxd (e.g., 'joker-folie-a-deux' for 'letterboxd.com/film/joker-folie-a-deux/')
 
     Returns:
-    - Dictionary containing movie title, release year, genres, director, rating, actors, and poster image URL.
+    - Dictionary containing movie title, release year, genres, director, rating, actors (with Wikipedia URLs), and poster image URL.
     """
     url = f"https://letterboxd.com/film/{movie_slug}/"
     response = requests.get(url)
@@ -124,14 +119,25 @@ def scrape_letterboxd_movie(movie_slug: str):
     
     # Extract details from the JSON data
     title = movie_data.get("name", "Unknown Movie")
-    year = movie_data.get("datePublished", "").split("-")[0] or "N/A"
+    year_element = soup.find('a', href=re.compile(r'/films/year/\d{4}/'))
+    year = year_element.text if year_element else "N/A"
+
     genres = movie_data.get("genre", [])
     director = movie_data.get("director", [{}])[0].get("name", "N/A")
     rating = movie_data.get("aggregateRating", {}).get("ratingValue", 0.0)
     poster_url = movie_data.get("image", "https://via.placeholder.com/150")
     
-    # Extract actors
-    actors = [actor["name"] for actor in movie_data.get("actors", [])]
+    # Extract actors and create Wikipedia links for each
+    actors = [
+        {
+            "name": actor["name"],
+            "wiki_url": f"https://en.wikipedia.org/wiki/{actor['name'].replace(' ', '_')}"
+        }
+        for actor in movie_data.get("actors", [])
+    ]
+
+    summary_tag = soup.find("meta", property="og:description")
+    summary = summary_tag["content"] if summary_tag else "No summary available"
     
     # Return the results in a dictionary
     return {
@@ -141,7 +147,8 @@ def scrape_letterboxd_movie(movie_slug: str):
         "director": director,
         "rating": rating,
         "actors": actors,
-        "poster_url": poster_url,
+        "movie_image": poster_url,
+        "summary": summary
     }
 
 
