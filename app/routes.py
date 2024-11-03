@@ -23,6 +23,7 @@ from app.functions.user_actions import (
 )
 from app import db
 
+
 def init_routes(app):
     @app.route("/")
     @login_required
@@ -35,7 +36,7 @@ def init_routes(app):
         data = request.json
         recommendation = movie_recommendation([data["input"]])  # Adjust based on your input format
         return jsonify({"recommendations": recommendation.tolist()})
-    
+
     @app.route("/recent", methods=["GET"])
     def recent():
         return render_template("recent.html", movies=User.get_rated_movies(current_user))
@@ -44,10 +45,11 @@ def init_routes(app):
     def movie_info(movie_id):
         try:
             print("movie_id:", movie_id)
-        
+
             movie_data = scrape_letterboxd_movie(movie_id)
             if not movie_data or not movie_data.get("title"):
                 return render_template("error.html", error="Movie data not found")
+            print("Final movie data:", movie_data)
             return render_template("movie_info.html", movie=movie_data)
         except Exception as e:
             print(e)

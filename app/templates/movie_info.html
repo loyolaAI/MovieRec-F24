@@ -2,48 +2,25 @@
 {% block title %}{{ movie.title }}{% endblock %}
 {% block content %}
 
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Movie Streaming Dashboard</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-        <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/mainPage.css') }}">
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            "primary": 'var(--primary)',
-                            "primary-muted": "var(--primary-muted)",
-                            "secondary": "var(--secondary)",
-                            "secondary-muted": "var(--secondary-muted)",
-                            "destructive": "var(--destructive)"
-                        }
-                    }
-                }
-            }
-        </script>
-    </head>
-    <main>
-        <header>
-            <nav>
-                <a href="{{ url_for('home') }}" class="logo">
-                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
-                </a>
-            </nav>
-        </header>
-        <section class="content">
-            <h1>{{ movie.title }}</h1>
-            <img src="{{ movie.poster }}" alt="{{ movie.title }}" class="rounded-lg w-64 mb-4">
-            <p>Rating: {{ movie.rating }}</p>
-            <p>Summary: {{ movie.summary }}</p>
-        </section>
-    </main>
-</html>
-
+<main class="bg-secondary text-primary flex-grow container mx-auto p-6 flex flex-col items-center">
+    <section class="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl">
+        <h1 class="text-2xl font-bold mb-4">{{ movie.title }}</h1>
+        <img src="{{ movie.movie_image }}" alt="{{ movie.title }}" class="rounded-lg w-full h-auto mb-4 shadow-lg">
+        <div class="text-gray-700">
+            <p class="mb-2"><strong>Rating:</strong> {{ movie.rating }} / 5</p>
+            <p class="mb-2"><strong>Year:</strong> {{ movie.year }}</p>
+            <p class="mb-2"><strong>Genres:</strong> {{ movie.genres | join(', ') }}</p>
+            <p class="mb-4"><strong>Director:</strong> {{ movie.director }}</p>
+            <p class="mb-4">
+                <strong>Actors:</strong>
+                {% for actor in movie.actors %}
+                    <a href="{{ actor.wiki_url }}" target="_blank" class="text-secondary hover:underline">{{ actor.name }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            
+            <p><strong>Summary:</strong> {{ movie.summary }}</p>
+        </div>
+    </section>
+</main>
 
 {% endblock %}

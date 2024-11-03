@@ -83,70 +83,73 @@ def scrap_letterboxd(username: str):
     # Return the results
     return movie_names, movie_slugs, movie_ratings, movie_images
 
+
 def scrape_letterboxd_movie(movie_slug: str):
     """
     Scrapes details of a specific movie from Letterboxd using its slug.
-    
+
     Args:
     - movie_slug: The slug part of the movie URL on Letterboxd (e.g., 'joker-folie-a-deux' for 'letterboxd.com/film/joker-folie-a-deux/')
-    
+
     Returns:
-    - Dictionary containing movie title, release year, genres, director, rating, and poster image URL.
+    - Dictionary containing movie title, release year, genres, director, rating, actors (with Wikipedia URLs), and poster image URL.
     """
-    movie_slug = movie_slug.strip()  # Clean the movie_slug of any leading/trailing whitespace
     url = f"https://letterboxd.com/film/{movie_slug}/"
     response = requests.get(url)
-    
+
     if response.status_code != 200:
         raise Exception(f"Failed to retrieve data. Status code: {response.status_code}")
-    
+
     soup = BeautifulSoup(response.text, "html.parser")
-    
-    print("Soup successfully parsed.")
-    
+
     # Extract JSON-LD data which contains movie details
     script_data = soup.select_one('script[type="application/ld+json"]')
     if not script_data:
-        print("Movie data not found on the page.")
         raise ValueError("Movie data not found on the page.")
 
     # Get the content of the script and strip the CDATA tags
     raw_data = script_data.string
-    if raw_data.startswith('/* <![CDATA[ */'):
-        raw_data = raw_data.replace('/* <![CDATA[ */', '').replace('/* ]]> */', '').strip()
+    cleaned_data = re.sub(r"/\* <!\[CDATA\[ \*/|/\* \]\]> \*/", "", raw_data).strip()
 
+    # Parse JSON data
     try:
-        movie_data = json.loads(raw_data)
-        print("Movie data successfully parsed.")
+        movie_data = json.loads(cleaned_data)
     except json.JSONDecodeError as e:
         print("Error decoding JSON:", str(e))
-        print("Invalid JSON data:", raw_data)
-        
-        # Return fake movie data if JSON decoding fails
-        return {
-            "title": "Unknown Movie",
-            "year": "N/A",
-            "genres": ["Drama"],
-            "director": "N/A",
-            "rating": 0.0,
-            "poster_url": "https://via.placeholder.com/150"
-        }
+        return None
 
     # Extract details from the JSON data
     title = movie_data.get("name", "Unknown Movie")
-    year = movie_data.get("datePublished", "").split("-")[0] or "N/A"
+    year_element = soup.find("a", href=re.compile(r"/films/year/\d{4}/"))
+    year = year_element.text if year_element else "N/A"
+
     genres = movie_data.get("genre", [])
     director = movie_data.get("director", [{}])[0].get("name", "N/A")
     rating = movie_data.get("aggregateRating", {}).get("ratingValue", 0.0)
     poster_url = movie_data.get("image", "https://via.placeholder.com/150")
 
+    # Extract actors and create Wikipedia links for each
+    actors = [
+        {
+            "name": actor["name"],
+            "wiki_url": f"https://en.wikipedia.org/wiki/{actor['name'].replace(' ', '_')}",
+        }
+        for actor in movie_data.get("actors", [])
+    ]
+
+    summary_tag = soup.find("meta", property="og:description")
+    summary = summary_tag["content"] if summary_tag else "No summary available"
+
+    # Return the results in a dictionary
     return {
         "title": title,
         "year": year,
         "genres": genres,
         "director": director,
         "rating": rating,
-        "poster_url": poster_url,
+        "actors": actors,
+        "movie_image": poster_url,
+        "summary": summary,
     }
 
 
