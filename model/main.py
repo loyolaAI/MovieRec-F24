@@ -34,6 +34,7 @@ def main():
         rating = rec.get("unclipped_rating")
         print(f"{movie_name} {round(rating, 2)}")
 
+
 def get_recommendations(username, accuracy=0.01, number_recs=20, obscureness=9):
     # Call get_movie_dataframe to get all the user data and ratings to make recommendations.
     df = get_movie_dataframe(accuracy)
@@ -52,7 +53,6 @@ def get_recommendations(username, accuracy=0.01, number_recs=20, obscureness=9):
     print(f"Recommendations:\n{recs}")  # Check the recommendations
 
     return recs
-
 
 
 if __name__ == "__main__":

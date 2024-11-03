@@ -55,7 +55,9 @@ def init_routes(app):
                 print(f"Error generating recommendations: {e}")
                 return jsonify({"error": "Failed to generate recommendations"}), 500
 
-        return render_template("discover.html", recommendations=recommendations, username=current_user.username)
+        return render_template(
+            "discover.html", recommendations=recommendations, username=current_user.username
+        )
 
     @app.route("/recent", methods=["GET"])
     def recent():
