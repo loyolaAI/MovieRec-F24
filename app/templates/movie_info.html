@@ -36,7 +36,7 @@
             <br>
             <p class="mb-4">
                 <strong>Actors:</strong>
-                {% for actor in movie.actors %}
+                {% for actor in movie.actors[:20] %}
                     <a href="{{ actor.wiki_url }}" target="_blank" class="text-secondary hover:underline">{{ actor.name }}</a>{% if not loop.last %}, {% endif %}
                 {% endfor %}
             </p>

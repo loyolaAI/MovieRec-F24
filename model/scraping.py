@@ -141,26 +141,34 @@ def scrape_letterboxd_movie(movie_slug: str):
     summary_tag = soup.find("meta", property="og:description")
     summary = summary_tag["content"] if summary_tag else "No summary available"
 
-    # Extract reviews
     reviews = []
     review_elements = soup.find_all("li", class_="film-detail")
+
     for review in review_elements:
         reviewer_name = (
             review.find("strong", class_="name").text.strip()
             if review.find("strong", class_="name")
             else "Unknown"
         )
-        review_content = (
-            review.find("div", class_="body-text -prose collapsible-text").p.text.strip()
-            if review.find("div", class_="body-text -prose collapsible-text")
-            else "No content available"
-        )
+
+        # Check for hidden-spoiler text first, then fallback to main body-text div
+        review_content_div = review.find("div", class_="hidden-spoilers expanded-text") or \
+                             review.find("div", class_="body-text -prose collapsible-text")
+        
+        # Get all paragraphs within the selected review content and join them
+        if review_content_div:
+            paragraphs = review_content_div.find_all("p")
+            review_content = " ".join(p.text.strip() for p in paragraphs)
+        else:
+            review_content = "No content available"
+
         like_count = (
             review.find("p", class_="like-link-target").get("data-count", "0")
             if review.find("p", class_="like-link-target")
             else "0"
         )
 
+        # Append each review to the list
         reviews.append({"reviewer": reviewer_name, "content": review_content, "likes": like_count})
 
     # Return the results in a dictionary
