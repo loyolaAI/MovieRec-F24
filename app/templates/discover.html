@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Discover Movies{% endblock %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Discover Movies - Movie Streaming Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/mainPage.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": 'var(--primary)',
+                        "primary-muted": "var(--primary-muted)",
+                        "secondary": "var(--secondary)",
+                        "secondary-muted": "var(--secondary-muted)",
+                        "destructive": "var(--destructive)"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <main>
+        <header>
+            <nav>
+                <a href="{{ url_for('home') }}" class="logo">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+                </a>
+            </nav>
+        </header>
+
+        <section class="content container mx-auto p-6">
+            <h1 class="text-2xl font-bold mb-6">Discover Movies</h1>
+
+            <form method="POST" action="{{ url_for('discover') }}" class="flex flex-col gap-4">
+                <input type="hidden" name="username" value="{{ username }}">
+
+                <label for="accuracy" class="font-bold">Model Accuracy:</label>
+                <input type="range" id="accuracy" name="accuracy" min="0.01" max="1.0" step="0.01" value="0.5" class="slider" oninput="this.nextElementSibling.value = this.value">
+                <output>0.5</output>
+
+                <label for="obscureness" class="font-bold">Obscureness:</label>
+                <input type="range" id="obscureness" name="obscureness" min="0" max="9" step="1" value="0" class="slider" oninput="this.nextElementSibling.value = this.value">
+                <output>0</output>
+
+                <label for="number_recs" class="font-bold">Number of Recommendations:</label>
+                <input type="range" id="number_recs" name="number_recs" min="1" max="50" step="1" value="5" class="slider" oninput="this.nextElementSibling.value = this.value">
+                <output>5</output>
+
+                <button type="submit" class="bg-blue-500 text-white p-2 rounded">Get Recommendations</button>
+            </form>
+
+            <h1 class="text-2xl font-bold mb-6">Recommended Movies</h1>
+            <div class="col-span-7 flex flex-wrap gap-4">
+                {% for movie in recommendations %}
+                <div class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
+                    <img src="{{ url_for('static', filename='images/' + movie.film_id + '.jpg') }}" alt="{{ movie.film_id }}" class="rounded-2xl" />
+                    <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col gap-2 p-4">
+                        <h2 class="text-lg font-bold mt-4">{{ movie.film_id.replace('-', ' ').title() }}</h2>
+                        <p class="text-sm">Predicted Rating: {{ movie.predicted_rating }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p>No recommendations available at this time.</p>
+                {% endfor %}
+            </div>
+
+        </section>
+    </main>
+</body>
+
+</html>
+
+{% endblock %}
