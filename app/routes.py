@@ -2,7 +2,7 @@ from flask import request, jsonify, render_template, redirect, url_for, flash, a
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
 from datetime import datetime
-from model.scraping import scrape_letterboxd_movie
+from model.scraping import scrape_letterboxd_movie, scrap_letterboxd
 
 import sys
 
