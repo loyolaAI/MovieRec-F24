@@ -10,6 +10,10 @@ Where we will store the Fall 2024 project
 - Most likely will be hosting using Heroku
 - Flask or FastAPI for backend?
 
+# Errors with the Wheel building
+
+Refer to [tutorials/install_surprise.md](tutorials/install_surprise.md)
+
 # How to pass the linter
 
 Before you push or make a pull request, you should run.
