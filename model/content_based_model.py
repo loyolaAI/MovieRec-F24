@@ -102,7 +102,7 @@ def get_recommendations_for_user(user_movies, movies, cosine_sim, top_n=5):
 # Main workflow
 if __name__ == "__main__":
     # Load the data
-    movie_data_file = "model/data/movies.csv.gz"  # Path to your dataset
+    movie_data_file = "./data/movies.csv.gz"  # Path to your dataset
     movies = load_data(movie_data_file)
 
     # Preprocess the data
