@@ -185,12 +185,6 @@ def scrape_letterboxd_movie(movie_slug: str):
         "reviews": reviews,
     }
 
-
-import requests
-from bs4 import BeautifulSoup
-import json
-
-
 def scrape_recommended_movies(movie_slugs):
     movie_data = []  # List to hold data for each recommended movie
 
