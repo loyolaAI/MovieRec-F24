@@ -185,6 +185,7 @@ def scrape_letterboxd_movie(movie_slug: str):
         "reviews": reviews,
     }
 
+
 def scrape_recommended_movies(movie_slugs):
     movie_data = []  # List to hold data for each recommended movie
 
