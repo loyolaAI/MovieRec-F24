@@ -48,6 +48,7 @@ PyYAML==6.0.2
 requests==2.32.3
 scikit-learn==1.5.2
 scikit-surprise==1.1.4
+scipy==1.13.0
 sendgrid==6.11.0
 six==1.16.0
 soupsieve==2.6

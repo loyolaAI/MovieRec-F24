@@ -1,7 +1,12 @@
-from model.get_user_data import get_movie_dataframe
+from model.get_user_data import get_movie_dataframe  # Comment below 4 to use method locally
 from model.build_colab_model import build_colab_model
 from model.run_colab_model import run_colab_model
 from model.scraping import scrape_and_make_dataframe
+
+# from get_user_data import get_movie_dataframe # Uncomment below 4 to use method locally
+# from build_colab_model import build_colab_model
+# from run_colab_model import run_colab_model
+# from scraping import scrape_and_make_dataframe
 
 
 def main():

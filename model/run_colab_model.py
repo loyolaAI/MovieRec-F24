@@ -3,8 +3,10 @@ import random
 
 # update
 
-from model.build_colab_model import build_colab_model
-from model.scraping import scrape_and_make_dataframe
+from model.build_colab_model import build_colab_model  # Comment if you want to run method locally
+
+# from build_colab_model import build_colab_model # Uncomment if you want to run method locally
+# from model.scraping import scrape_and_make_dataframe
 
 
 # Define function to get top recommendations
