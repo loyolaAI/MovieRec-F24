@@ -3,7 +3,7 @@ import pandas as pd
 
 def get_movie_info(user_data: pd.DataFrame) -> pd.DataFrame:
     """
-    Currently when we scrap someones letterboxd, we only get the movie name and rating.
+    Currently when we scrape someones letterboxd, we only get the movie name and rating.
     we also need to add the genre and other info for content based filtering. So that's
     what this method needs to do. You should be able to take the Movie_name_slug from the
     dataframe and search for the same title within the films.csv.gz and then get the technical
@@ -24,6 +24,7 @@ def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame, accuracy
 def get_movie_dataframe(accuracy: float) -> pd.DataFrame:
     # Total length of all the ratings data, combined
     total_len = 18175545
+    # total_len = 1817
 
     # Calculate the total number of rows needed
     total_needed_rows = int(total_len * accuracy)
