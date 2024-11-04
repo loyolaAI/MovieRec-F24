@@ -186,6 +186,44 @@ def scrape_letterboxd_movie(movie_slug: str):
     }
 
 
+import requests
+from bs4 import BeautifulSoup
+import json
+
+
+def scrape_recommended_movies(movie_slugs):
+    movie_data = []  # List to hold data for each recommended movie
+
+    for movie_slug in movie_slugs:
+        # Construct the URL for each recommended movie
+        url = f"https://letterboxd.com/film/{movie_slug}/"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # Extract the JSON-LD data for each movie
+        script_with_data = soup.select_one('script[type="application/ld+json"]')
+
+        if script_with_data:  # Ensure that script_with_data is not None
+            try:
+                json_obj = json.loads(script_with_data.text.split(" */")[1].split("/* ]]>")[0])
+
+                # Extract movie title, ID (slug), and image URL
+                movie_title = json_obj["name"]
+                movie_image = json_obj["image"]
+                movie_id = movie_slug
+
+                # Append data to list as a dictionary
+                movie_data.append(
+                    {"title": movie_title, "movie_id": movie_id, "image": movie_image}
+                )
+            except Exception as e:
+                print(f"Error parsing JSON-LD for {movie_slug}: {e}")
+        else:
+            print(f"Warning: No JSON-LD data found for {movie_slug}")
+
+    return movie_data
+
+
 # Method to scrape a given letterboxd username and return a dataframe with the movie names and the star ratings.
 def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
     # Scrap the movies and ratings from the given letterboxd username
