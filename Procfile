@@ -1,1 +1,1 @@
-web: gunicorn "app:create_app()" --timeout 600
+web: gunicorn "app:create_app()" --timeout 300
