@@ -206,10 +206,14 @@ def scrape_recommended_movies(movie_slugs):
                 movie_title = json_obj["name"]
                 movie_image = json_obj["image"]
                 movie_id = movie_slug
+                try:
+                    movie_rating = json_obj["aggregateRating"]["ratingValue"]
+                except KeyError:
+                    movie_rating = ""
 
                 # Append data to list as a dictionary
                 movie_data.append(
-                    {"title": movie_title, "movie_id": movie_id, "image": movie_image}
+                    {"title": movie_title, "movie_id": movie_id, "image": movie_image, "rating": movie_rating}
                 )
             except Exception as e:
                 print(f"Error parsing JSON-LD for {movie_slug}: {e}")

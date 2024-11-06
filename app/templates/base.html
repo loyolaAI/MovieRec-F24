@@ -26,129 +26,141 @@
     }
   </script>
 </head>
-<body class="grid-cols-12 mx-auto container">
+<body class="lg:grid lg:grid-cols-12 mx-auto container">
+
   {% if auth['is_authenticated'] %}
-    
-    <aside class="col-span-2 p-10 border-x border-gray-500">
-      <nav class="flex flex-col h-full">
-        <div class="grid grid-cols-[48px_1fr] gap-2 color-white font-bold">
-          <img src="{{ url_for('static', filename='logo.png') }}" alt="LAIC Logo" class="size-12 row-span-2">
-          <span class="col-span-1 text-[20px] leading-5">LAIC</span>
-          <span class="col-span-1 text-[20px] leading-5">MovieRec</span>
+    <header class="lg:hidden flex items-center justify-between p-4 bg-primary text-white">
+      <span class="text-lg font-bold">MovieRec</span>
+      <button id="hamburgerButton" class="text-white focus:outline-none">
+        <x-hamburger-icon></x-hamburger-icon>
+      </button>
+    </header>
+
+    <!-- Mobile Sidebar Menu -->
+    <aside id="mobileMenu" class="fixed inset-0 bg-gray-800 bg-opacity-90 z-50 p-8 text-white transform -translate-x-full transition-transform duration-300">
+      <button id="closeButton" class="text-white mb-6 focus:outline-none">
+        <x-close-icon></x-close-icon>
+      </button>
+      <nav class="flex flex-col space-y-8">
+        <div class="grid grid-cols-[48px_1fr] gap-2 font-bold">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="LAIC Logo" class="w-12 h-12 row-span-2">
+          <span class="text-lg">LAIC</span>
+          <span class="text-lg">MovieRec</span>
         </div>
-    
-        <div class="flex-1 flex flex-col gap-12 mt-24 font-semibold [&_ul_span]:mb-2 [&_ul_span]:text-gray-400 [&>ul>a.active]:text-primary [&>ul>a]:relative [&>ul>a:hover]:underline">
-          <ul class="flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
-            <span>Menu</span>
-            <a href="/">
-              <li>
-                <x-home-icon></x-home-icon> Home
-              </li>
+
+        <ul class="space-y-4 font-semibold">
+          <li class="text-gray-400">Menu</li>
+          <a href="/" class="block hover:text-primary">
+            <li class="flex items-center space-x-3"><x-home-icon></x-home-icon> <span>Home</span></li>
+          </a>
+          <a href="/discover?username=your_username" class="block hover:text-primary">
+            <li class="flex items-center space-x-3"><x-compass-icon></x-compass-icon> <span>Discover</span></li>
+          </a>
+        </ul>
+
+        <ul class="space-y-4 font-semibold mt-8">
+          <li class="text-gray-400">Library</li>
+          <a href="/recent" class="block hover:text-primary">
+            <li class="flex items-center space-x-3"><x-clock3-icon></x-clock3-icon> <span>Recent</span></li>
+          </a>
+        </ul>
+
+        <ul class="mt-8 space-y-4 font-semibold">
+          <li class="text-gray-400">General</li>
+          <a href="/profile" class="block hover:text-primary">
+            <li class="flex items-center space-x-3"><x-settings-icon></x-settings-icon> <span>Settings</span></li>
+          </a>
+          <a href="/logout" class="block hover:text-primary">
+            <li class="flex items-center space-x-3"><x-log-out-icon></x-log-out-icon> <span>Logout</span></li>
+          </a>
+        </ul>
+      </nav>
+    </aside>
+
+    <aside class="hidden lg:block col-span-2 p-4 lg:p-10 border-r border-gray-500">
+      <nav class="flex flex-col h-full">
+        <div class="grid grid-cols-[48px_1fr] gap-2 font-bold">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="LAIC Logo" class="w-12 h-12 row-span-2">
+          <span class="text-lg">LAIC</span>
+          <span class="text-lg">MovieRec</span>
+        </div>
+
+        <div class="flex-1 mt-12">
+          <ul class="space-y-4 font-semibold">
+            <li class="text-gray-400">Menu</li>
+            <a href="/" class="block hover:text-primary">
+              <li class="flex items-center space-x-3"><x-home-icon></x-home-icon> <span>Home</span></li>
             </a>
-            <a href="/discover?username=your_username">
-              <li>
-                <x-compass-icon></x-compass-icon> Discover
-              </li>
+            <a href="/discover?username=your_username" class="block hover:text-primary">
+              <li class="flex items-center space-x-3"><x-compass-icon></x-compass-icon> <span>Discover</span></li>
             </a>
           </ul>
-    
-          <ul class="flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
-            <span>Library</span>
-    
-            <a href="/recent">
-              <li>
-                <x-clock3-icon></x-clock3-icon> Recent
-              </li>
-            </a>
-            <a href="/top">
-              <li>
-                <x-star-icon></x-star-icon> Top Rated
-              </li>
-            </a>
-            <a href="/playlists">
-              <li>
-                <x-heart-icon></x-heart-icon> Playlists
-              </li>
-            </a>
-            <a href="/watchlist">
-              <li>
-                <x-plus-square-icon></x-plus-square-icon> Watchlist
-              </li>
-            </a>
-            <a href="/completed">
-              <li>
-                <x-plus-check-icon></x-plus-check-icon> Completed
-              </li>
+          <ul class="mt-8 space-y-4 font-semibold">
+            <li class="text-gray-400">Library</li>
+            <a href="/recent" class="block hover:text-primary">
+              <li class="flex items-center space-x-3"><x-clock3-icon></x-clock3-icon> <span>Recent</span></li>
             </a>
           </ul>
-    
-          <ul class="mt-auto flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
-            <span>General</span>
-    
-            <a href="/profile">
-              <li>
-                <x-settings-icon></x-settings-icon> Settings
-              </li>
+          <ul class="mt-auto space-y-4 font-semibold">
+            <li class="text-gray-400">General</li>
+            <a href="/profile" class="block hover:text-primary">
+              <li class="flex items-center space-x-3"><x-settings-icon></x-settings-icon> <span>Settings</span></li>
             </a>
-    
-            <a href="/logout">
-              <li>
-                <x-log-out-icon></x-log-out-icon> Logout
-              </li>
+            <a href="/logout" class="block hover:text-primary">
+              <li class="flex items-center space-x-3"><x-log-out-icon></x-log-out-icon> <span>Logout</span></li>
             </a>
           </ul>
         </div>
       </nav>
     </aside>
-    <script>
-      const pathname = window.location.pathname;
-      document.querySelector(`[href="${pathname}"]`).classList.add('active');
-    </script>
   {% endif %}
 
-  {% block content %}
-  
-  {% endblock %}
+  <main class="col-span-12 lg:col-span-7 p-4 lg:p-10">
+    {% block content %}
+    {% endblock %}
+  </main>
 
   {% if auth['is_authenticated'] %}
-    <aside class="col-span-3 p-10 border-x border-gray-500">
-      <div class="flex justify-end items-center flex-col gap-2">
-        <div class="relative dropdown-trigger">
-          <label class="grid grid-cols-[auto_56px_32px] p-4 cursor-pointer text-end transition-color rounded-lg transition-colors hover:bg-white/10 has-[input:checked]:bg-white/10 peer group">
+    <aside class="hidden lg:block col-span-3 p-4 lg:p-10 border-l border-gray-500">
+      <div class="flex flex-col items-end gap-4">
+        <div class="relative">
+          <label class="grid grid-cols-[auto_56px_32px] p-4 cursor-pointer text-end hover:bg-white/10 rounded-lg group">
             <span>{{ auth['username'] }}</span>
-  
-            <img
-            src="{{ auth['profile_image_url'] }}"
-            alt='{% for i in range(( auth["username"] ).split(" ")|length)[:2] %}{{( auth["username"] ).split(" ")[i][0]}}{% endfor %}'
-            class="size-12 flex-shrink-0 row-span-2 ml-2 rounded-lg bg-white/10 text-center leading-[48px] font-semibold"
-            >
-            <x-down-icon class="row-span-2 flex items-center ml-2 transition-transform group-has-[input:checked]:rotate-180"></x-down-icon>
-  
+            <img src="{{ auth['profile_image_url'] }}" alt="{{ auth['username'] | first | upper }}" class="w-12 h-12 rounded-full bg-white/10 ml-2">
+            <x-down-icon class="ml-2 transition-transform group-hover:rotate-180"></x-down-icon>
             <span class="text-gray-400">{{ auth['email'] }}</span>
-            <input type="checkbox" class="hidden" autocomplete="off" name="dropdown"/>
           </label>
-          <div class="absolute flex flex-col [&>a]:grid [&>a]:grid-cols-[20px_1fr] [&>a]:gap-2 top-[110px] right-0 p-4 rounded-lg border border-primary w-full -translate-y-10 opacity-0 pointer-events-none select-none transition-all peer-has-[input:checked]:translate-y-0 peer-has-[input:checked]:opacity-100 peer-has-[input:checked]:pointer-events-auto peer-has-[input:checked]:select-auto">
-            <a href="/profile" class="py-1 px-2 hover:underline">
-              <x-user-icon></x-user-icon> Profile
-            </a>
-            <a href="/logout" class="py-1 px-2 hover:underline">
-              <x-log-out-icon></x-log-out-icon>Logout
-            </a>
+          <input type="checkbox" class="hidden" autocomplete="off" name="dropdown"/>
+          <div class="absolute right-0 p-4 mt-2 border border-primary bg-white shadow-lg rounded-lg hidden group-hover:block">
+            <a href="/profile" class="block py-2 hover:underline"><x-user-icon></x-user-icon> Profile</a>
+            <a href="/logout" class="block py-2 hover:underline"><x-log-out-icon></x-log-out-icon> Logout</a>
           </div>
         </div>
       </div>
     </aside>
-    <script>
-      const dropdownTrigger = document.querySelector('.dropdown-trigger');
-      const dropdownInput = document.querySelector('input[name="dropdown"]');
-    
-      document.addEventListener('click', (e) => {
-        if (!dropdownTrigger.contains(e.target)) {
-          dropdownInput.checked = false;
-        }
-      });
-    </script>
   {% endif %}
+
+  <script>
+    const hamburgerButton = document.getElementById('hamburgerButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const closeButton = document.getElementById('closeButton');
+
+    hamburgerButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('-translate-x-full');
+    });
+
+    closeButton.addEventListener('click', () => {
+      mobileMenu.classList.add('-translate-x-full');
+    });
+
+    // Close the menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!mobileMenu.contains(e.target) && e.target !== hamburgerButton) {
+        mobileMenu.classList.add('-translate-x-full');
+      }
+    });
+  </script>
+  
 </body>
 </html>
 {% endwith %}

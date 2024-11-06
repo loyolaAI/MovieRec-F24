@@ -47,7 +47,7 @@
                     <img src="{{ movie['movie_image'] }}" alt="{{ movie['movie_title'] }}" class="rounded-2xl"/>
                     <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col gap-2 p-4">
                         <h2 class="text-lg font-bold mt-4">{{ movie['movie_title'] }}</h2>
-                        <p class="text-sm">{{ movie['year'] }} | Rating: {{ movie['movie_ratings'] }}</p>
+                        <p class="text-sm">{{ movie['year'] }}{{ movie['movie_ratings'] }}</p>
                     </div>
                 </a>
                 {% endfor %}
