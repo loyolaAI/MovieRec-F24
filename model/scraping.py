@@ -8,80 +8,76 @@ import pandas as pd
 import json
 
 
-def scrape_letterboxd(username: str):
+def scrape_letterboxd(username: str) -> dict:
+    # Define the return dictionary
+    user_data_dict = {"names": [], "slugs": [], "ratings": [], "images": []}
+    # Define the regex patterns for name, slug, and rating which will
+    # look for there respective Strings to collect.
+    regex_patterns = {
+        "name": re.compile(r'alt="([^"]+)"'),
+        "slug": re.compile(r'data-film-slug="([^"]+)"'),
+        "rating": re.compile(r"rated-(\d+)"),
+    }
+
     page_number = 1
-    movie_names = []
-    movie_slugs = []
-    movie_ratings = []
-    movie_images = []
+    # Scrape movies with ratings
     while True:
-        # Given the username, create the letterboxd url so we can scrape the movies
-        url = "https://letterboxd.com/" + username.strip() + "/films/page/" + str(page_number) + "/"
-        response = requests.get(url)
-
-        # Initialize the regular expressions which will scan the soup file
-        # for all of the movie names and star ratings.
-        regex_movie_names = re.compile(r'alt="([^"]+)"')
-        regex_movie_slugs = re.compile(r'data-film-slug="([^"]+)"')
-        regex_movie_ratings = re.compile(r"rated-(\d+)")
-
-        # Make the soup to pull everything off the users letterboxd webpage.
+        url = f"https://letterboxd.com/{username.strip()}/films/page/{page_number}/"
+        # Make the soup object
         soup = BeautifulSoup(requests.get(url).text, "html.parser")
-
-        # Now find everything from only the actual movie section of the webpage, not the other info
+        # Take the section from the soup that has the actual movies
         film_html = soup.find_all("li", class_=re.compile(r"poster-container"))
 
-        # If there aren't any films found, break out of the loop
+        # Break if no films are found on the page
         if not film_html:
             break
 
-        # Now, using regex, we get all the movie names and ratings from the HTML file.
-        # This automatically creates a list for each variable.
-        movie_names = re.findall(regex_movie_names, str(film_html))
-        movie_slugs = re.findall(regex_movie_slugs, str(film_html))
-        movie_ratings = re.findall(regex_movie_ratings, str(film_html))
+        # Extract data using regex on the HTML snippet for names, slugs, and ratings
+        page_names = regex_patterns["name"].findall(str(film_html))
+        page_slugs = regex_patterns["slug"].findall(str(film_html))
+        page_ratings = [int(r) for r in regex_patterns["rating"].findall(str(film_html))]
 
+        # Add data from the page to the main list
+        user_data_dict["names"].extend(page_names)
+        user_data_dict["slugs"].extend(page_slugs)
+        user_data_dict["ratings"].extend(page_ratings)
+        # Move onto the next page
         page_number += 1
 
-    """ Now we're going to remove the movies from the users letterbox'd that don't
-        have a rating associated with them. Because it won't add to the model and
-        it will break when we try and create a dataframe.   """
-    # We now get the url for the movies that don't have any reviews.
-    url_no_reviews = "https://letterboxd.com/" + username.strip() + "/films/rated/none/"
-
-    # Make the soup to pull everything off that webpage.
+    # Scrape movies without ratings to exclude from results, We need this because it will offset
+    # the ratings column and then we won't know if the movie[i] actually equals rating[i]
+    url_no_reviews = f"https://letterboxd.com/{username.strip()}/films/rated/none/"
     soup = BeautifulSoup(requests.get(url_no_reviews).text, "html.parser")
-
-    # Now scrape everything from only the reviews section. that is the 'list__...'
     film_html_no_reviews = soup.find_all("li", class_=re.compile(r"poster-container"))
 
-    # Get the list of all the removed movies.
-    removed_movie_names = re.findall(r'alt="([^"]+)"', str(film_html_no_reviews))
-    removed_movie_slugs = re.findall(r'data-film-slug="([^"]+)"', str(film_html_no_reviews))
+    # Use sets for efficient removal of unrated movies
+    removed_names = set(regex_patterns["name"].findall(str(film_html_no_reviews)))
+    removed_slugs = set(regex_patterns["slug"].findall(str(film_html_no_reviews)))
 
-    """ Loop over all the movies we found, and remove them so that
-    len(movie_names) == len(movie_ratings) and we don't have movies without ratings
-    If the movie exists within the lists we should remove it
-    We wont need this when we scrape all the movies instead of
-    only the first page. """
-    movie_names = [movie for movie in movie_names if movie not in removed_movie_names]
-    movie_slugs = [movie for movie in movie_slugs if movie not in removed_movie_slugs]
-    movie_ratings = [int(rating) for rating in movie_ratings]
+    # Filter out unrated movies from the main data. We don't need to
+    # remove the ratings because the user never rated it.
+    user_data_dict["names"] = [
+        name for name in user_data_dict["names"] if name not in removed_names
+    ]
+    user_data_dict["slugs"] = [
+        slug for slug in user_data_dict["slugs"] if slug not in removed_slugs
+    ]
 
-    # Get the images for the movies
-    # Lowkey stole this code from https://stackoverflow.com/questions/73803684/trying-to-scrape-posters-from-letterboxd-python
-    movie_images = []
-    for movie in movie_slugs:
-        url = f"https://letterboxd.com/film/{movie}/"
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, "html.parser")
+    # Fetch images for rated movies using the slug
+    for slug in user_data_dict["slugs"]:
+        film_url = f"https://letterboxd.com/film/{slug}/"
+        # Make the soup object to scrap the websites html
+        film_soup = BeautifulSoup(requests.get(film_url).text, "html.parser")
+        # Get the url data
+        script_data = film_soup.select_one('script[type="application/ld+json"]')
 
-        script_w_data = soup.select_one('script[type="application/ld+json"]')
-        json_obj = json.loads(script_w_data.text.split(" */")[1].split("/* ]]>")[0])
-        movie_images.append(json_obj["image"])
+        # If we have a url, we format it and add to the list.
+        if script_data:
+            json_data = json.loads(script_data.text.split(" */")[1].split("/* ]]>")[0])
+            user_data_dict["images"].append(json_data.get("image", ""))
 
-    # Return the results
-    return movie_names, movie_slugs, movie_ratings, movie_images
+    # Return the users letterboxd data as a dictionary
+    return user_data_dict
 
 
 def scrape_letterboxd_movie(movie_slug: str):
@@ -222,22 +218,19 @@ def scrape_recommended_movies(movie_slugs):
 # Method to scrape a given letterboxd username and return a dataframe with the movie names and the star ratings.
 def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
     # Scrape the movies and ratings from the given letterboxd username
-    (movie_name, movie_slugs, movie_rating, movie_images) = scrape_letterboxd(username)
-
-    # Convert the ratings from string to integer using list comprehension
-    int_movie_ratings = [int(i) for i in movie_rating]
+    user_data_dict = scrape_letterboxd(username)
 
     # Make a list of size (movie_name) for the usernames, Not necessary just included it
-    username_list = [username] * len(movie_name)
+    username_list = [username] * len(user_data_dict["names"])
 
     # Return the results as a Pandas dataframe
     return pd.DataFrame(
         {
             "user_name": username_list,
-            "film_id": movie_slugs,
-            "Movie_name": movie_name,
-            "rating": int_movie_ratings,
-            "image": movie_images,
+            "film_id": user_data_dict["slugs"],
+            "Movie_name": user_data_dict["names"],
+            "rating": user_data_dict["ratings"],
+            "image": user_data_dict["images"],
         }
     )
 
