@@ -8,14 +8,14 @@ import pandas as pd
 import json
 
 
-def scrap_letterboxd(username: str):
+def scrape_letterboxd(username: str):
     page_number = 1
     movie_names = []
     movie_slugs = []
     movie_ratings = []
     movie_images = []
     while True:
-        # Given the username, create the letterboxd url so we can scrap the movies
+        # Given the username, create the letterboxd url so we can scrape the movies
         url = "https://letterboxd.com/" + username.strip() + "/films/page/" + str(page_number) + "/"
         response = requests.get(url)
 
@@ -52,7 +52,7 @@ def scrap_letterboxd(username: str):
     # Make the soup to pull everything off that webpage.
     soup = BeautifulSoup(requests.get(url_no_reviews).text, "html.parser")
 
-    # Now scrap everything from only the reviews section. that is the 'list__...'
+    # Now scrape everything from only the reviews section. that is the 'list__...'
     film_html_no_reviews = soup.find_all("li", class_=re.compile(r"poster-container"))
 
     # Get the list of all the removed movies.
@@ -186,11 +186,6 @@ def scrape_letterboxd_movie(movie_slug: str):
     }
 
 
-import requests
-from bs4 import BeautifulSoup
-import json
-
-
 def scrape_recommended_movies(movie_slugs):
     movie_data = []  # List to hold data for each recommended movie
 
@@ -226,8 +221,8 @@ def scrape_recommended_movies(movie_slugs):
 
 # Method to scrape a given letterboxd username and return a dataframe with the movie names and the star ratings.
 def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
-    # Scrap the movies and ratings from the given letterboxd username
-    (movie_name, movie_slugs, movie_rating, movie_images) = scrap_letterboxd(username)
+    # Scrape the movies and ratings from the given letterboxd username
+    (movie_name, movie_slugs, movie_rating, movie_images) = scrape_letterboxd(username)
 
     # Convert the ratings from string to integer using list comprehension
     int_movie_ratings = [int(i) for i in movie_rating]
