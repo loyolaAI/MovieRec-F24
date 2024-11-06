@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import random
+from surprise import BaselineOnly
 
 try:
     from surprise import Dataset
@@ -42,7 +43,8 @@ def build_colab_model(df, user_data, accuracy=0.1):
     data = Dataset.load_from_df(df[["user_name", "film_id", "rating"]], reader)
 
     # Initialize the singular value decomposition from scikit-learn surprise library.
-    algo = SVD()
+    # algo = SVD()
+    algo = BaselineOnly()
 
     # Fit the SVD algorithm onto the combined full-dataset with the users data
     trainingSet = data.build_full_trainset()
