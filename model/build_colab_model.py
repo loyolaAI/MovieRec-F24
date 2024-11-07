@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import random
+from surprise import BaselineOnly
 
 from surprise import Dataset
 from surprise import Reader

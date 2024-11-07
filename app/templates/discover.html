@@ -54,7 +54,7 @@
                 <output>0</output>
 
                 <label for="number_recs" class="font-bold">Number of Recommendations:</label>
-                <input type="range" id="number_recs" name="number_recs" min="1" max="1000" step="1" value="5" class="slider" oninput="this.nextElementSibling.value = this.value">
+                <input type="range" id="number_recs" name="number_recs" min="1" max="100" step="1" value="5" class="slider" oninput="this.nextElementSibling.value = this.value">
                 <output>5</output>
 
                 <button type="submit" class="bg-blue-500 text-white p-2 rounded">Get Recommendations</button>
@@ -63,16 +63,18 @@
             <h1 class="text-2xl font-bold mb-6">Recommended Movies</h1>
             <div class="col-span-7 flex flex-wrap gap-4">
                 {% for movie in recommendations %}
-                    <div class="movie">
-                        <a href="{{ url_for('movie_info', movie_id=movie.movie_id) }}">
-                            <img src="{{ movie.image }}" alt="{{ movie.title }}">
-                            <p>{{ movie.title }}</p>
-                        </a>
+                <a href="{{ url_for('movie_info', movie_id=movie.movie_id) }}" class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
+                    <img src="{{ movie.image }}" alt="{{ movie.title }}" class="rounded-2xl"/>
+                    <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col gap-2 p-4">
+                        <h2 class="text-lg font-bold mt-4">{{ movie.title }}</h2>
+                        {% if movie.rating %}
+                            <p class="text-sm">{{ movie.rating }}★</p>
+                        {% endif %}
                     </div>
+                </a>
                 {% else %}
-                    <p>No recommendations available.</p>
+                <p>No recommendations available.</p>
                 {% endfor %}
-
             </div>
 
         </section>
