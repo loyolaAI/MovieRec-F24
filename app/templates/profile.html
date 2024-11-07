@@ -75,6 +75,12 @@
         <form method="DELETE" action="/profile">
           <button class="save-changes" style="margin-top: auto" type="submit" onclick="(e) => console.log(e.target.parentNode)">Save Changes</button>
         </form>
+
+        <form method="POST" action="/scrape-letterboxd">
+          <button type="submit" class="refresh-ratings" style="margin-top: 1rem; background-color: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 5px;">
+            Refresh Ratings
+          </button>
+        </form>
       </div>
     </div>
 
