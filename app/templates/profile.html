@@ -7,6 +7,7 @@
   <form class="auth-card" style="width: 100%; max-width: 100%; margin-top: 1rem; background: rgba(255,255,255,0.05);" autocomplete="off" method="POST" action="/profile" enctype="multipart/form-data">
     <div class="profile-form-container">
       <div>
+        <!-- Profile Image -->
         <label for="pfp" class="img-upload">
           <input type="file" id="pfp" name="pfp" accept="image/*" style="width: 256px; height: 256px; z-index: 3; opacity: 0;" disabled>
           {% if auth['profile_image_url'] is none %}
@@ -79,6 +80,13 @@
         <form method="POST" action="/scrape-letterboxd">
           <button type="submit" class="refresh-ratings" style="margin-top: 1rem; background-color: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 5px;">
             Refresh Ratings
+          </button>
+        </form>
+
+        <!-- Logout Button -->
+        <form method="POST" action="/logout" style="margin-bottom: 1rem;">
+          <button type="submit" style="background-color: var(--destructive); color: white; padding: 0.5rem 1rem; border: none; border-radius: 5px;">
+            Logout
           </button>
         </form>
       </div>
