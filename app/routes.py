@@ -66,6 +66,10 @@ def init_routes(app):
             "discover.html", recommendations=recommendations, username=current_user.username
         )
 
+    @app.route("/popular", methods=["GET"])
+    def popular():
+        return render_template("popular.html")  # TODO
+
     @app.route("/recent", methods=["GET"])
     def recent():
         return render_template("recent.html", movies=User.get_rated_movies(current_user))
