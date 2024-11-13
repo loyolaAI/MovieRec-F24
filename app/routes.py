@@ -1,7 +1,7 @@
 from flask import request, jsonify, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
-from datetime import datetime
+from datetime import datetime, timezone
 
 import sys
 
@@ -106,7 +106,7 @@ def init_routes(app):
         # Check if user already exists
         does_user_exist = User.get_by_email(email)
         if does_user_exist:
-            flash("Error: Email address already exists")
+            flash("Error: Email address already exists", "error")
             return redirect(url_for("signup"))
 
         # Create User
@@ -118,7 +118,7 @@ def init_routes(app):
         db.session.add(new_user)
         db.session.commit()
 
-        return redirect(url_for("login"))
+        return redirect("/login?email=" + email)
 
     @app.route("/login")
     def login():
@@ -133,12 +133,12 @@ def init_routes(app):
         # Check if user exists
         user = User.get_by_email(email)
         if not user:
-            flash("Error: Please check your login details and try again.")
+            flash("Error: User not found.", "error")
             return redirect(url_for("login"))
 
         # Check if password is correct
         if not check_password_hash(user.password, password):
-            flash("Error: Please check your login details and try again.")
+            flash("Error: Please check your login details and try again.", "error")
             return redirect(url_for("login"))
 
         # While we're at it, check if there are any expired reset tokens
@@ -167,7 +167,7 @@ def init_routes(app):
         # Check if user exists
         user = User.get_by_email(email)
         if user is None:
-            flash("Error: User not found.")
+            flash("Error: User not found.", "error")
             return redirect(url_for("reset_password"))
 
         reset_token = []
@@ -177,10 +177,13 @@ def init_routes(app):
         if not user.reset_token:
             reset_token.append(Pass.create_reset_token(user))
         elif user.reset_token:
-            if user.reset_token.expires_at > datetime.now():
+            current = datetime.now().replace(tzinfo=timezone.utc)
+            expires = user.reset_token.expires_at.replace(tzinfo=timezone.utc)
+
+            if expires > current:
                 Pass.delete_reset_token(user.reset_token)
                 reset_token.append(Pass.create_reset_token(user))
-            elif user.reset_token.expires_at < datetime.now():
+            elif expires < current:
                 reset_token.append(Pass.create_reset_token(user))
 
         db.session.add(reset_token[0])
@@ -199,12 +202,12 @@ def init_routes(app):
 
         # Check if token exists
         if not reset_token:
-            flash("Error: Token not found.")
+            flash("Error: Token not found.", "error")
             return redirect(url_for("reset_password"))
 
         # Check if token is expired
         if reset_token.expires_at < datetime.now():
-            flash("Error: Token has expired.")
+            flash("Error: Token has expired.", "error")
             return redirect(url_for("reset_password"))
 
         # Update user password

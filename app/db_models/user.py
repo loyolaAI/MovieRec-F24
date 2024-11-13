@@ -74,8 +74,8 @@ class User(UserMixin, db.Model):
         )
 
         cloudinary.uploader.destroy(self.profile_image_id)
-        self.profile_image_url = None
-        self.profile_image_id = None
+        self.profile_image_url = ""
+        self.profile_image_id = ""
         db.session.commit()
 
     def has_rated_movie(self, movie_id: str) -> bool:
