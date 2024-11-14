@@ -15,9 +15,9 @@
     <main>
         <section class="content container mx-auto p-6">
             <h1 class="text-2xl font-bold mb-6">Search Movies</h1>
-            <form method="POST" action="{{ url_for('search') }}" class="mb-6">
-                <input type="text" name="query" value="{{ query }}" placeholder="Enter movie title or genre" class="border rounded p-2 w-full"/>
-                <button type="submit" class="bg-primary text-white rounded px-4 py-2 mt-2">Search</button>
+            <form method="POST" action="{{ url_for('search') }}" class="mb-6 text-black">
+                <input type="text" name="query" value="{{ query }}" placeholder="Enter movie title or genre" class="border rounded p-2 w-full text-black"/>
+                <button type="submit" class="bg-primary text-white px-4 py-2 mt-2">Search</button>
             </form>
 
             {% if search_results %}
