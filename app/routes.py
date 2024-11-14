@@ -66,7 +66,7 @@ def init_routes(app):
         return render_template(
             "discover.html", recommendations=recommendations, username=current_user.username
         )
-    
+
     @app.route("/search", methods=["GET", "POST"])
     def search():
         search_results = []
@@ -82,8 +82,10 @@ def init_routes(app):
         # Filter movies if there's a search query
         if query:
             search_results = [
-                movie for movie in movies
-                if query.lower() in movie["movie_title"].lower() or query.lower() in movie["genres"].lower()
+                movie
+                for movie in movies
+                if query.lower() in movie["movie_title"].lower()
+                or query.lower() in movie["genres"].lower()
             ]
 
         return render_template("search.html", search_results=search_results, query=query)
@@ -118,7 +120,7 @@ def init_routes(app):
     #     # Fetch using 'movie_data' function
     #     # Throw exception if there is not movie data
     #     return
-        
+
     # ================== Authentication Related ==================
     @app.route("/profile")
     @login_required

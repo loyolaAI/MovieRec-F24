@@ -118,13 +118,14 @@ def scrape_user_ratings(user: User) -> None:
     ratings = []
     # Finally, create ratings
     for i in range(len(movie_slugs)):
-      try:
-          rating = int(float(movie_ratings[i])) / 2  # Convert to float, then divide to get a 5-star rating
-          ratings.append(create_rating(user, movies[i], rating))
-      except ValueError:
-          print(f"Skipping invalid rating: {movie_ratings[i]}")
-          continue
-
+        try:
+            rating = (
+                int(float(movie_ratings[i])) / 2
+            )  # Convert to float, then divide to get a 5-star rating
+            ratings.append(create_rating(user, movies[i], rating))
+        except ValueError:
+            print(f"Skipping invalid rating: {movie_ratings[i]}")
+            continue
 
     db.session.add_all(movies)
     db.session.add_all(ratings)
