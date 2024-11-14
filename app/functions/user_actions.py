@@ -75,9 +75,12 @@ def send_password_reset_email(user: User, token: Pass) -> None:
 
 
 def scrape_user_ratings(user: User) -> None:
-    movie_names, movie_slugs, movie_ratings, movie_images = scrape_letterboxd(
-        user.letterboxd_username
-    )
+    user_data = scrape_letterboxd(user.letterboxd_username)
+
+    movie_names = user_data["names"]
+    movie_slugs = user_data["slugs"]
+    movie_ratings = user_data["ratings"]
+    movie_images = user_data["images"]
 
     # First create the movie objects for any movies that haven't been scraped yet
     movies = []

@@ -246,7 +246,8 @@ def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Sample use
-    username = input("Please type your letterboxd username : ")
-    print(f"Now scraping : {username}")
-    df = scrape_and_make_dataframe(username.strip())
-    print(df)
+    # username = input("Please type your letterboxd username : ")
+    # print(f"Now scraping : {username}")
+    # df = scrape_and_make_dataframe(username.strip())
+    # print(df)
+    scrape_letterboxd_movie("joker-folie-a-deux")

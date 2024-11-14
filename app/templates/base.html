@@ -3,7 +3,9 @@
 <html lang="en" class="overscroll-none">
 <head>
   <meta charset="UTF-8">
-  <title>Movie Streaming Dashboard</title>
+  <title>
+    {% block title %}LAIC MovieRec{% endblock %}
+  </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
   <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>

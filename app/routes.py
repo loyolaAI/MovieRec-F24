@@ -41,27 +41,19 @@ def init_routes(app):
 
     # Fetch Movie Data
     @app.route("/movie/<movie_id>", methods=["GET"])
-    def fetch_movie_data(movie_id):
+    def movie(movie_id):
         movie = Movie.get_by_id(movie_id)
 
         if movie is None:
             movie = requests.get("https://letterboxd.com/film/" + movie_id)
 
-        if (
-            type(movie) == requests.models.Response
-            and movie.status_code == 404
-            or type(movie) == Movie
-            and movie is None
+        if (type(movie) == requests.models.Response and movie.status_code == 404) or (
+            type(movie) == Movie and movie is None
         ):
             return not_found("Movie not found")
 
-        return jsonify(
-            {
-                "movie_id": movie.movie_id,
-                "movie_title": movie.movie_title,
-                "movie_image": movie.movie_image,
-            }
-        )
+        movie = scrape_letterboxd_movie(movie_id)
+        return render_template("movie_info.html", movie=movie)
 
     @app.route("/discover", methods=["GET", "POST"])
     def discover():
@@ -140,9 +132,9 @@ def init_routes(app):
         User.get_by_email(current_user.email).delete_image()
         return jsonify({"Status": 200, "Message": "Image deleted successfully"})
 
-    @app.route("/scrape-letterboxd", methods=["POST"])
+    @app.route("/scrape-letterboxd")
     @login_required
-    def scrape_letterboxd():
+    def scrape():
         scrape_user_ratings(current_user)
         db.session.commit()
 
