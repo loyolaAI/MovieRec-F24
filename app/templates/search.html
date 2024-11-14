@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Search Movies{% endblock %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Movies - MovieRec-f24</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/mainPage.css') }}">
+</head>
+
+<body>
+    <main>
+        <section class="content container mx-auto p-6">
+            <h1 class="text-2xl font-bold mb-6">Search Movies</h1>
+            <form method="POST" action="{{ url_for('search') }}" class="mb-6">
+                <input type="text" name="query" value="{{ query }}" placeholder="Enter movie title or genre" class="border rounded p-2 w-full"/>
+                <button type="submit" class="bg-primary text-white rounded px-4 py-2 mt-2">Search</button>
+            </form>
+
+            {% if search_results %}
+                <h2 class="text-xl font-semibold mb-4">Results for "{{ query }}":</h2>
+                <div class="flex flex-wrap gap-4">
+                    {% for movie in search_results %}
+                        <div class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 p-4">
+                            <a href="{{ movie['imdb_link'] }}" target="_blank">
+                                <h3 class="text-lg font-bold">{{ movie['movie_title'] }}</h3>
+                            </a>
+                            <p class="text-sm">Year Released: {{ movie['year_released'] }}</p>
+                            <p class="text-sm">Genres: {{ movie['genres'] }}</p>
+                            <p class="text-sm">Language: {{ movie['original_language'] }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {% if query %}
+                    <p class="text-gray-500">No results found for "{{ query }}".</p>
+                {% endif %}
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
+
+{% endblock %}

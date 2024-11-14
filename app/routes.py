@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash
 from datetime import datetime
 from model.scraping import scrape_letterboxd_movie, scrape_letterboxd, scrape_recommended_movies
 from model.main import get_recommendations
+import csv
 
 
 # from model.main import get_recommendations
@@ -65,10 +66,31 @@ def init_routes(app):
         return render_template(
             "discover.html", recommendations=recommendations, username=current_user.username
         )
+    
+    @app.route("/search", methods=["GET", "POST"])
+    def search():
+        search_results = []
+        query = request.form.get("query") if request.method == "POST" else ""
 
-    @app.route("/popular", methods=["GET"])
-    def popular():
-        return render_template("popular.html")  # TODO
+        # Read movies from CSV
+        movies = []
+        with open("model/data/movies.csv", "r") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                movies.append(row)
+
+        # Filter movies if there's a search query
+        if query:
+            search_results = [
+                movie for movie in movies
+                if query.lower() in movie["movie_title"].lower() or query.lower() in movie["genres"].lower()
+            ]
+
+        return render_template("search.html", search_results=search_results, query=query)
+
+    # @app.route("/popular", methods=["GET"])
+    # def popular():
+    #     return render_template("popular.html")  # TODO
 
     @app.route("/recent", methods=["GET"])
     def recent():
@@ -96,15 +118,7 @@ def init_routes(app):
     #     # Fetch using 'movie_data' function
     #     # Throw exception if there is not movie data
     #     return
-
-    # Search For Movie(s)
-    @app.route("/search", methods=["GET"])
-    def search():
-        # Validity Check
-        # Movie Search
-        # Throw exception if there is no movie, or give similar
-        return
-
+        
     # ================== Authentication Related ==================
     @app.route("/profile")
     @login_required

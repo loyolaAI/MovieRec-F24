@@ -75,9 +75,15 @@ def send_password_reset_email(user: User, token: Pass) -> None:
 
 
 def scrape_user_ratings(user: User) -> None:
-    movie_names, movie_slugs, movie_ratings, movie_images = scrape_letterboxd(
-        user.letterboxd_username
-    )
+    # movie_names, movie_slugs, movie_ratings, movie_images = scrape_letterboxd(
+    #     user.letterboxd_username
+    # )
+
+    movie_data = scrape_letterboxd(user.letterboxd_username)
+    movie_names = movie_data["names"]
+    movie_slugs = movie_data["slugs"]
+    movie_ratings = movie_data["ratings"]
+    movie_images = movie_data["images"]
 
     # First create the movie objects for any movies that haven't been scraped yet
     movies = []
@@ -112,9 +118,13 @@ def scrape_user_ratings(user: User) -> None:
     ratings = []
     # Finally, create ratings
     for i in range(len(movie_slugs)):
-        ratings.append(
-            create_rating(user, movies[i], movie_ratings[i] / 2)
-        )  # Letterboxd ratings are out of 10, so divide by 2 to get a 5-star rating
+      try:
+          rating = int(float(movie_ratings[i])) / 2  # Convert to float, then divide to get a 5-star rating
+          ratings.append(create_rating(user, movies[i], rating))
+      except ValueError:
+          print(f"Skipping invalid rating: {movie_ratings[i]}")
+          continue
+
 
     db.session.add_all(movies)
     db.session.add_all(ratings)
