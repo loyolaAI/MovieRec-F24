@@ -3,7 +3,7 @@ from app.db_models.user import User
 from app.db_models.movie import Movie
 from app.db_models.movie_rating import MovieRating
 from app.db_models.password_reset_token import PasswordResetToken as Pass
-from model.scraping import scrap_letterboxd
+from model.scraping import scrape_letterboxd
 from app import db
 
 import os
@@ -74,8 +74,8 @@ def send_password_reset_email(user: User, token: Pass) -> None:
     sg.send(message)
 
 
-def scrap_user_ratings(user: User) -> None:
-    movie_names, movie_slugs, movie_ratings, movie_images = scrap_letterboxd(
+def scrape_user_ratings(user: User) -> None:
+    movie_names, movie_slugs, movie_ratings, movie_images = scrape_letterboxd(
         user.letterboxd_username
     )
 

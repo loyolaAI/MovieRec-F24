@@ -1,13 +1,14 @@
-from flask import request, jsonify, render_template, redirect, url_for, flash
+from flask import request, jsonify, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
+from model.scraping import scrape_letterboxd_movie, scrape_letterboxd, scrape_recommended_movies
+from model.main import get_recommendations
 from datetime import datetime, timezone
 import requests
 
 import sys
 
 sys.path.append("..")
-
 
 from app.functions.movie_recommender import movie_recommendation
 from app.db_models.user import User
@@ -16,7 +17,7 @@ from app.db_models.movie import Movie
 from app.db_models.movie_rating import MovieRating
 
 from app.functions.user_actions import (
-    scrap_user_ratings,
+    scrape_user_ratings,
     create_user,
     update_password,
     send_password_reset_email,
@@ -24,18 +25,12 @@ from app.functions.user_actions import (
 )
 from app import db
 
-from model.scraping import scrap_letterboxd
-
 
 def init_routes(app):
     @app.route("/")
     @login_required
     def home():
         return render_template("index.html", movies=User.get_rated_movies(current_user))
-
-    @app.errorhandler(404)
-    def not_found(message="Not Found"):
-        return render_template("not-found.html", message=message), 404
 
     # Recommendation
     @app.route("/recommend", methods=["POST"])
@@ -68,6 +63,42 @@ def init_routes(app):
             }
         )
 
+    @app.route("/discover", methods=["GET", "POST"])
+    def discover():
+        recommendations = []  # Initialize an empty list for recommendations
+        if request.method == "POST":
+            data = request.form
+            username = data.get("username")
+            accuracy = float(data.get("accuracy", 0.01))
+            number_recs = int(data.get("number_recs", 10))
+            obscureness = int(data.get("obscureness", 9))
+
+            # Ensure the username is provided
+            if not username:
+                return jsonify({"error": "Username is required"}), 400
+
+            try:
+                # Get recommendations and extract only the film IDs
+                recommendation_dicts = get_recommendations(
+                    username, accuracy, number_recs, obscureness
+                )
+                recommendation_slugs = [rec["film_id"] for rec in recommendation_dicts]
+
+                # Scrape data for each recommended movie using just the film_id
+                recommendations = scrape_recommended_movies(recommendation_slugs)
+
+            except Exception as e:
+                print(f"Error generating recommendations: {e}")
+                return jsonify({"error": "Failed to generate recommendations"}), 500
+
+        return render_template(
+            "discover.html", recommendations=recommendations, username=current_user.username
+        )
+
+    @app.route("/recent", methods=["GET"])
+    def recent():
+        return render_template("recent.html", movies=User.get_rated_movies(current_user))
+
     # Search For Movie(s)
     @app.route("/search", methods=["GET"])
     def search():
@@ -77,6 +108,10 @@ def init_routes(app):
         return
 
     # ================== Authentication Related ==================
+    @app.errorhandler(404)
+    def not_found(message="Not Found"):
+        return render_template("not-found.html", message=message), 404
+
     @app.route("/profile")
     @login_required
     def profile():
@@ -105,10 +140,10 @@ def init_routes(app):
         User.get_by_email(current_user.email).delete_image()
         return jsonify({"Status": 200, "Message": "Image deleted successfully"})
 
-    @app.route("/scrap-letterboxd", methods=["POST"])
+    @app.route("/scrape-letterboxd", methods=["POST"])
     @login_required
-    def scrap_letterboxd():
-        scrap_user_ratings(current_user)
+    def scrape_letterboxd():
+        scrape_user_ratings(current_user)
         db.session.commit()
 
         return redirect(url_for("home"))
@@ -133,8 +168,8 @@ def init_routes(app):
         # Create User
         new_user = create_user(email, username, password, letterboxd)
 
-        # Scrap User Ratings, this function adds the ratings to the user object and DB
-        scrap_user_ratings(new_user)
+        # Scrape User Ratings, this function adds the ratings to the user object and DB
+        scrape_user_ratings(new_user)
 
         db.session.add(new_user)
         db.session.commit()

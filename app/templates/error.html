@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Error: {{ e }}{% endblock %}
+{% block content %}
+<div class="error-container">
+    <h1>Error</h1>
+    <p>{{ e }}</p>
+    <button onclick="history.back()" class="btn">Go Back</button>
+</div>
+
+<style>
+    .error-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        border: 1px solid #f5c6cb;
+        background-color: #f8d7da;
+        color: #721c24;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .btn {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+</style>
+{% endblock %}
