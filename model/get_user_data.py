@@ -19,6 +19,14 @@ def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame, accuracy
     should be as simple as taking the .csv file with all the movies and getting only movies
     the user has not seen.
     """
+    # get all movies have watched
+    watched_movies = user_data['film_id'].tolist()
+
+    # Filter out movies that have already been watched
+    unwatched_movies = movies[~movies['film_id'].isin(watched_movies)]
+    
+    # Return the list
+    return unwatched_movies['film_id'].tolist()
 
 
 def get_movie_dataframe(accuracy: float) -> pd.DataFrame:
@@ -65,3 +73,9 @@ def get_movie_dataframe(accuracy: float) -> pd.DataFrame:
     # Concatenate all the chunks into a single DataFrame
     df = pd.concat(dfs, ignore_index=True)
     return df
+
+if __name__ == "__main__":
+    movies = get_movie_dataframe(0.05)
+    userdata = pd.read_csv("./data/sample_user_data.csv")
+    h = get_unwatched_movies(userdata, movies, 0.05)
+    print(h)
