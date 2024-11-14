@@ -3,7 +3,9 @@
 {% block content %}
 {% with auth = current_user %}
 <main class="m-auto w-full max-w-5xl flex flex-col p-2 md:p-4 lg:p-8">
-  <h1 class="text-lg md:text-xl lg:text-2xl mb-2 font-bold">Welcome back, {{ auth['username'] }}</h1>
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <h1 class="text-lg md:text-xl lg:text-2xl mb-2 font-bold">Welcome back, {{ auth['username'] }}</h1>
+  </div>
   
   <form method="POST" action="/profile" enctype="multipart/form-data" autocomplete="off" class="!max-w-5xl w-full p-4 rounded-lg bg-black/20 flex flex-col md:flex-row gap-4">
     <!-- PROFILE PICTURE -->

@@ -14,3 +14,6 @@ class Movie(db.Model):
 
     # Back reference to MovieRating
     ratings: Mapped[list["MovieRating"]] = relationship("MovieRating", back_populates="movie")  # type: ignore
+
+    def get_by_id(movie_id: str) -> "Movie":
+        return Movie.query.filter_by(movie_id=movie_id).first()

@@ -2,6 +2,7 @@ from flask import request, jsonify, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
 from datetime import datetime, timezone
+import requests
 
 import sys
 
@@ -32,6 +33,10 @@ def init_routes(app):
     def home():
         return render_template("index.html", movies=User.get_rated_movies(current_user))
 
+    @app.errorhandler(404)
+    def not_found(message="Not Found"):
+        return render_template("not-found.html", message=message), 404
+
     # Recommendation
     @app.route("/recommend", methods=["POST"])
     def recommend():
@@ -40,12 +45,28 @@ def init_routes(app):
         return jsonify({"recommendations": recommendation.tolist()})
 
     # Fetch Movie Data
-    @app.route("/movie/<int:movie_id>", methods=["GET"])
+    @app.route("/movie/<movie_id>", methods=["GET"])
     def fetch_movie_data(movie_id):
-        # Validity Check
-        # Fetch using 'movie_data' function
-        # Throw exception if there is not movie data
-        return
+        movie = Movie.get_by_id(movie_id)
+
+        if movie is None:
+            movie = requests.get("https://letterboxd.com/film/" + movie_id)
+
+        if (
+            type(movie) == requests.models.Response
+            and movie.status_code == 404
+            or type(movie) == Movie
+            and movie is None
+        ):
+            return not_found("Movie not found")
+
+        return jsonify(
+            {
+                "movie_id": movie.movie_id,
+                "movie_title": movie.movie_title,
+                "movie_image": movie.movie_image,
+            }
+        )
 
     # Search For Movie(s)
     @app.route("/search", methods=["GET"])
