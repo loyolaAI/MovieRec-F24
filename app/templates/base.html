@@ -9,33 +9,50 @@
   <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='styles/mainPage.css') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary": 'var(--primary)',
+            "primary-muted": "var(--primary-muted)",
+            "secondary": "var(--secondary)",
+            "secondary-muted": "var(--secondary-muted)",
+            "destructive": "var(--destructive)"
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
+<body class="grid-cols-12 mx-auto container">
   {% if auth['is_authenticated'] %}
-    <aside class="nav-sidebar">
-      <nav>
-        <div>
-          <img src="{{ url_for('static', filename='logo.png') }}" alt="LAIC Logo" style="height: 48px; width: 48px; grid-row: span 2;">
-          <span>LAIC</span>
-          <span>MovieRec</span>
+    
+    <aside class="col-span-2 p-10 border-x border-gray-500">
+      <nav class="flex flex-col h-full">
+        <div class="grid grid-cols-[48px_1fr] gap-2 color-white font-bold">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="LAIC Logo" class="size-12 row-span-2">
+          <span class="col-span-1 text-[20px] leading-5">LAIC</span>
+          <span class="col-span-1 text-[20px] leading-5">MovieRec</span>
         </div>
     
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 3rem; margin-top: 6rem;">
-          <ul>
+        <div class="flex-1 flex flex-col gap-12 mt-24 font-semibold [&_ul_span]:mb-2 [&_ul_span]:text-gray-400 [&>ul>a.active]:text-primary [&>ul>a]:relative [&>ul>a:hover]:underline">
+          <ul class="flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
             <span>Menu</span>
             <a href="/">
               <li>
                 <x-home-icon></x-home-icon> Home
               </li>
             </a>
-            <a href="/discover">
+            <a href="/discover?username=your_username">
               <li>
                 <x-compass-icon></x-compass-icon> Discover
               </li>
             </a>
           </ul>
     
-          <ul>
+          <ul class="flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
             <span>Library</span>
     
             <a href="/recent">
@@ -65,7 +82,7 @@
             </a>
           </ul>
     
-          <ul style="margin-top: auto">
+          <ul class="mt-auto flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
             <span>General</span>
     
             <a href="/profile">
@@ -94,30 +111,30 @@
   {% endblock %}
 
   {% if auth['is_authenticated'] %}
-    <aside class="profile-sidebar">
-      <div class="dropdown-container">
-        <div class="dropdown-trigger">
-          <div style="display: flex; justify-content: flex-end; gap: 0.5rem; align-items: center; height: 100%;">
-            <input name="disableCheckboxThing"type="hidden"value="0"/>   <!-- I'm not sure how this works, but this one being here sets the actual input as disabled by default -->
-            <input type="checkbox" name="dropdown" id="profile-dropdown" style="display: none;"/>
-            <label style="display: grid; grid-template-columns: 1fr 24px; text-align: end; cursor: pointer; padding: 1rem; transition: background 0.1s ease-in-out; border-radius: 8px;" for="profile-dropdown">
-              <span>{{ auth['username'] }}</span>
-    
-              <x-down-icon style="grid-row: span 2; display: flex; justify-content: center; align-items: center; margin-left: 8px; transition: transform 0.2s ease-in-out;"></x-down-icon>
-    
-              <span style="color: grey">{{ auth['email'] }}</span>
-            </label>
+    <aside class="col-span-3 p-10 border-x border-gray-500">
+      <div class="flex justify-end items-center flex-col gap-2">
+        <div class="relative dropdown-trigger">
+          <label class="grid grid-cols-[auto_56px_32px] p-4 cursor-pointer text-end transition-color rounded-lg transition-colors hover:bg-white/10 has-[input:checked]:bg-white/10 peer group">
+            <span>{{ auth['username'] }}</span>
+  
             <img
-              src="{{ auth['profile_image_url'] }}"
-              alt='{% for i in range(("Joel Gutierrez").split(" ")|length)[:2] %}{{("Joel Gutierrez").split(" ")[i][0]}}{% endfor %}'
-              style="height: 48px; width: 48px; border-radius: 1rem; background-color: rgba(255,255,255,0.2);"
+            src="{{ auth['profile_image_url'] }}"
+            alt='{% for i in range(( auth["username"] ).split(" ")|length)[:2] %}{{( auth["username"] ).split(" ")[i][0]}}{% endfor %}'
+            class="size-12 flex-shrink-0 row-span-2 ml-2 rounded-lg bg-white/10 text-center leading-[48px] font-semibold"
             >
+            <x-down-icon class="row-span-2 flex items-center ml-2 transition-transform group-has-[input:checked]:rotate-180"></x-down-icon>
+  
+            <span class="text-gray-400">{{ auth['email'] }}</span>
+            <input type="checkbox" class="hidden" autocomplete="off" name="dropdown"/>
+          </label>
+          <div class="absolute flex flex-col [&>a]:grid [&>a]:grid-cols-[20px_1fr] [&>a]:gap-2 top-[110px] right-0 p-4 rounded-lg border border-primary w-full -translate-y-10 opacity-0 pointer-events-none select-none transition-all peer-has-[input:checked]:translate-y-0 peer-has-[input:checked]:opacity-100 peer-has-[input:checked]:pointer-events-auto peer-has-[input:checked]:select-auto">
+            <a href="/profile" class="py-1 px-2 hover:underline">
+              <x-user-icon></x-user-icon> Profile
+            </a>
+            <a href="/logout" class="py-1 px-2 hover:underline">
+              <x-log-out-icon></x-log-out-icon>Logout
+            </a>
           </div>
-        </div>
-        <div class="dropdown-content">
-          <a href="/profile">Profile</a>
-          <!-- <a href="/settings">Settings</a> -->
-          <a href="/logout">Log Out</a>
         </div>
       </div>
     </aside>

@@ -12,9 +12,9 @@
 <div class="container auth-page-container" style="gap: 0.5rem; z-index: 1;">
   {% with messages = get_flashed_messages() %}
   {% if messages %}
-      <div class="notification is-danger">
-          {{ messages[0] }}
-      </div>
+    <div class="notification is-danger">
+      {{ messages[0] }}
+    </div>
   {% endif %}
   {% endwith %}
   <form class="auth-card" method="POST" action="/login">

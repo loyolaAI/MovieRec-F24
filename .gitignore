@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 instance/db.sqlite
 .env
+tailwind.config.js

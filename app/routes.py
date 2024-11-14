@@ -1,13 +1,25 @@
-from flask import request, jsonify, render_template, redirect, url_for, flash
+from flask import request, jsonify, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
 from datetime import datetime
+from model.scraping import scrape_letterboxd_movie, scrape_letterboxd, scrape_recommended_movies
+from model.main import get_recommendations
+
+
+# from model.main import get_recommendations
+
+import sys
+
+sys.path.append("..")
 
 from app.functions.movie_recommender import movie_recommendation
 from app.db_models.user import User
 from app.db_models.password_reset_token import PasswordResetToken as Pass
+from app.db_models.movie import Movie
+from app.db_models.movie_rating import MovieRating
 
 from app.functions.user_actions import (
+    scrape_user_ratings,
     create_user,
     update_password,
     send_password_reset_email,
@@ -15,29 +27,71 @@ from app.functions.user_actions import (
 )
 from app import db
 
-# from app.model.scraping import scrap_letterboxd
-
 
 def init_routes(app):
     @app.route("/")
     @login_required
     def home():
-        return render_template("index.html")
+        return render_template("index.html", movies=User.get_rated_movies(current_user))
 
-    # Recommendation
-    @app.route("/recommend", methods=["POST"])
-    def recommend():
-        data = request.json
-        recommendation = movie_recommendation([data["input"]])  # Adjust based on your input format
-        return jsonify({"recommendations": recommendation.tolist()})
+    @app.route("/discover", methods=["GET", "POST"])
+    def discover():
+        recommendations = []  # Initialize an empty list for recommendations
+        if request.method == "POST":
+            data = request.form
+            username = data.get("username")
+            accuracy = float(data.get("accuracy", 0.01))
+            number_recs = int(data.get("number_recs", 10))
+            obscureness = int(data.get("obscureness", 9))
 
-    # Fetch Movie Data
-    @app.route("/movie/<int:movie_id>", methods=["GET"])
-    def fetch_movie_data(movie_id):
-        # Validity Check
-        # Fetch using 'movie_data' function
-        # Throw exception if there is not movie data
-        return
+            # Ensure the username is provided
+            if not username:
+                return jsonify({"error": "Username is required"}), 400
+
+            try:
+                # Get recommendations and extract only the film IDs
+                recommendation_dicts = get_recommendations(
+                    username, accuracy, number_recs, obscureness
+                )
+                recommendation_slugs = [rec["film_id"] for rec in recommendation_dicts]
+
+                # Scrape data for each recommended movie using just the film_id
+                recommendations = scrape_recommended_movies(recommendation_slugs)
+
+            except Exception as e:
+                print(f"Error generating recommendations: {e}")
+                return jsonify({"error": "Failed to generate recommendations"}), 500
+
+        return render_template(
+            "discover.html", recommendations=recommendations, username=current_user.username
+        )
+
+    @app.route("/recent", methods=["GET"])
+    def recent():
+        return render_template("recent.html", movies=User.get_rated_movies(current_user))
+
+    @app.route("/movie_info/<movie_id>", methods=["GET"])
+    def movie_info(movie_id):
+        try:
+            print("movie_id:", movie_id)
+
+            movie_data = scrape_letterboxd_movie(movie_id)
+            if not movie_data or not movie_data.get("title"):
+                return render_template("error.html", error="Movie data not found")
+            print("Final movie data:", movie_data)
+            return render_template("movie_info.html", movie=movie_data)
+        except Exception as e:
+            print(e)
+            print("movie_id:", movie_id)
+            return render_template("error.html", error=e)
+
+    # # Fetch Movie Data
+    # @app.route("/movie/<int:movie_id>", methods=["GET"])
+    # def fetch_movie_data(movie_id):
+    #     # Validity Check
+    #     # Fetch using 'movie_data' function
+    #     # Throw exception if there is not movie data
+    #     return
 
     # Search For Movie(s)
     @app.route("/search", methods=["GET"])
@@ -76,6 +130,14 @@ def init_routes(app):
         User.get_by_email(current_user.email).delete_image()
         return jsonify({"Status": 200, "Message": "Image deleted successfully"})
 
+    @app.route("/scrape-letterboxd", methods=["POST"])
+    @login_required
+    def scrape_letterboxd():
+        scrape_user_ratings(current_user)
+        db.session.commit()
+
+        return redirect(url_for("home"))
+
     @app.route("/signup")
     def signup():
         return render_template("signup.html")
@@ -93,11 +155,11 @@ def init_routes(app):
             flash("Error: Email address already exists")
             return redirect(url_for("signup"))
 
-        # Fetch user ratings from letterbox
-        # movie_names, movie_ratings = scrap_letterboxd(letterboxd)
-
         # Create User
         new_user = create_user(email, username, password, letterboxd)
+
+        # Scrape User Ratings, this function adds the ratings to the user object and DB
+        scrape_user_ratings(new_user)
 
         db.session.add(new_user)
         db.session.commit()

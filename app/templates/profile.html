@@ -2,7 +2,7 @@
 
 {% block content %}
 {% with auth = current_user %}
-<main class="container" style="padding: 4rem;">
+<main class="container p-16 col-span-7">
   <h1 style="width: 100%; margin-bottom: 2rem;">Welcome back, {{ auth['username'] }}</h1>
   <form class="auth-card" style="width: 100%; max-width: 100%; margin-top: 1rem; background: rgba(255,255,255,0.05);" autocomplete="off" method="POST" action="/profile" enctype="multipart/form-data">
     <div class="profile-form-container">
@@ -13,13 +13,13 @@
             <img
               src=""
               style="font-size: 128px; text-align: center;"
-              alt='{% for i in range(("Joel Gutierrez").split(" ")|length)[:2] %}{{("Joel Gutierrez").split(" ")[i][0]}}{% endfor %}'
+              alt='{% for i in range(auth.profile_image_url.split(" ")|length)[:2] %}{{auth.profile_image_url.split(" ")[i][0]}}{% endfor %}'
             >
           {% else %}
             <img
             src="{{ auth['profile_image_url'] }}"
             style="font-size: 128px; text-align: center;"
-            alt='{% for i in range(("Joel Gutierrez").split(" ")|length)[:2] %}{{ ("Joel Gutierrez").split(" ")[i][0] }}{% endfor %}'
+            alt='{% for i in range(auth.profile_image_url.split(" ")|length)[:2] %}{{ auth.profile_image_url.split(" ")[i][0] }}{% endfor %}'
             >
           {% endif %}
           <div class="upload-overlay">
@@ -74,6 +74,12 @@
 
         <form method="DELETE" action="/profile">
           <button class="save-changes" style="margin-top: auto" type="submit" onclick="(e) => console.log(e.target.parentNode)">Save Changes</button>
+        </form>
+
+        <form method="POST" action="/scrape-letterboxd">
+          <button type="submit" class="refresh-ratings" style="margin-top: 1rem; background-color: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 5px;">
+            Refresh Ratings
+          </button>
         </form>
       </div>
     </div>
