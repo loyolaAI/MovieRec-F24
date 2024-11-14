@@ -7,6 +7,10 @@ from datetime import datetime, timezone
 import requests
 
 import sys
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 sys.path.append("..")
 
@@ -57,11 +61,16 @@ def init_routes(app):
 
     @app.route("/discover", methods=["GET", "POST"])
     def discover():
+        # Limit for heroku
+        allowed_accuracy = 0.1
+        if os.getenv("LIMITED_MODEL") is not None and os.getenv("LIMITED_MODEL") == "True":
+            allowed_accuracy = 0.01
+
         recommendations = []  # Initialize an empty list for recommendations
         if request.method == "POST":
             data = request.form
             username = data.get("username")
-            accuracy = float(data.get("accuracy", 0.01))
+            accuracy = min(float(data.get("accuracy", 0.01)), allowed_accuracy)
             number_recs = int(data.get("number_recs", 10))
             obscureness = int(data.get("obscureness", 9))
 
