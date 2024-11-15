@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Watchlist{% endblock %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Movies</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/mainPage.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": 'var(--primary)',
+                        "secondary": 'var(--secondary)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <main>
+        <header class="py-4">
+            <nav class="flex justify-between px-4">
+                <a href="{{ url_for('home') }}" class="text-lg font-bold text-primary">Home</a>
+                <h1 class="text-2xl font-semibold">Watchlist</h1>
+            </nav>
+        </header>
+
+        <section class="p-4">
+            <form method="GET" action="{{ url_for('saved_movies') }}">
+                <label for="sort" class="block mb-2 text-sm font-medium">Sort by:</label>
+                <select name="sort" id="sort" class="border p-2 rounded mb-4">
+                    <option value="recent" {% if sort_by == 'recent' %}selected{% endif %}>Most Recent</option>
+                    <option value="alphabetical" {% if sort_by == 'alphabetical' %}selected{% endif %}>Alphabetical</option>
+                </select>
+                <button type="submit" class="px-4 py-2 bg-primary text-white rounded">Sort</button>
+            </form>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for movie in saved_movies %}
+                    <div class="bg-white shadow-md rounded p-4">
+                        <img src="{{ movie.movie_image }}" alt="{{ movie.movie_title }}" class="w-full h-64 object-cover mb-4 rounded">
+                        <h2 class="text-xl font-semibold">{{ movie.movie_title }}</h2>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
+
+{% endblock %}
