@@ -5,6 +5,7 @@ from datetime import datetime
 from model.scraping import scrape_letterboxd_movie, scrape_letterboxd, scrape_recommended_movies
 from model.main import get_recommendations
 import csv
+from math import ceil
 
 
 # from model.main import get_recommendations
@@ -69,8 +70,10 @@ def init_routes(app):
 
     @app.route("/search", methods=["GET", "POST"])
     def search():
+        query = request.form.get("query") if request.method == "POST" else request.args.get("query", "")
+        page = int(request.args.get("page", 1))  # Current page, defaults to 1
+        results_per_page = 5
         search_results = []
-        query = request.form.get("query") if request.method == "POST" else ""
 
         # Read movies from CSV
         movies = []
@@ -79,16 +82,41 @@ def init_routes(app):
             for row in reader:
                 movies.append(row)
 
-        # Filter movies if there's a search query
+        # Process query and filter movies
         if query:
-            search_results = [
+            filtered_results = [
                 movie
                 for movie in movies
                 if query.lower() in movie["movie_title"].lower()
                 or query.lower() in movie["genres"].lower()
             ]
 
-        return render_template("search.html", search_results=search_results, query=query)
+            # Pagination logic
+            total_pages = ceil(len(filtered_results) / results_per_page)
+            start = (page - 1) * results_per_page
+            end = start + results_per_page
+            paginated_results = filtered_results[start:end]
+
+            # Fetch additional details for the paginated results
+            try:
+                for movie in paginated_results:
+                    movie_data = scrape_letterboxd_movie(movie["film_id"])
+                    movie["poster_url"] = movie_data.get("movie_image", "")
+                    movie["rating"] = movie_data.get("rating", "")
+                search_results = paginated_results
+            except Exception as e:
+                print(f"Error processing search query '{query}': {e}")
+                return jsonify({"error": "Failed to process search query"}), 500
+
+            return render_template(
+                "search.html",
+                search_results=search_results,
+                query=query,
+                page=page,
+                total_pages=total_pages
+            )
+
+
 
     # @app.route("/popular", methods=["GET"])
     # def popular():
