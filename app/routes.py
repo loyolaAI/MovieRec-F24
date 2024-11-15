@@ -2,7 +2,7 @@ from flask import request, jsonify, render_template, redirect, url_for, flash, a
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
 from datetime import datetime
-from model.scraping import scrape_letterboxd_movie, scrape_letterboxd, scrape_recommended_movies
+from model.scraping import scrape_letterboxd_movie, scrape_letterboxd, scrape_recommended_movies, search_movies_from_csv
 from model.main import get_recommendations
 import csv
 from math import ceil
@@ -68,56 +68,30 @@ def init_routes(app):
             "discover.html", recommendations=recommendations, username=current_user.username
         )
 
-    @app.route("/search", methods=["GET", "POST"])
+    @app.route('/search', methods=['GET', 'POST'])
     def search():
-        query = request.form.get("query") if request.method == "POST" else request.args.get("query", "")
-        page = int(request.args.get("page", 1))  # Current page, defaults to 1
-        results_per_page = 5
-        search_results = []
+        query = request.args.get('query', '')
+        page = int(request.args.get('page', 1))
+        items_per_page = 5
 
-        # Read movies from CSV
-        movies = []
-        with open("model/data/movies.csv", "r") as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                movies.append(row)
+        # Fetch movies based on the query
+        all_movies = search_movies_from_csv(query)  # Function to filter movies from CSV
+        total_movies = len(all_movies)
+        total_pages = (total_movies + items_per_page - 1) // items_per_page
 
-        # Process query and filter movies
-        if query:
-            filtered_results = [
-                movie
-                for movie in movies
-                if query.lower() in movie["movie_title"].lower()
-                or query.lower() in movie["genres"].lower()
-            ]
+        # Paginate the movies
+        start = (page - 1) * items_per_page
+        end = start + items_per_page
+        paginated_movies = all_movies[start:end]
 
-            # Pagination logic
-            total_pages = ceil(len(filtered_results) / results_per_page)
-            start = (page - 1) * results_per_page
-            end = start + results_per_page
-            paginated_results = filtered_results[start:end]
-
-            # Fetch additional details for the paginated results
-            try:
-                for movie in paginated_results:
-                    movie_data = scrape_letterboxd_movie(movie["film_id"])
-                    movie["poster_url"] = movie_data.get("movie_image", "")
-                    movie["rating"] = movie_data.get("rating", "")
-                search_results = paginated_results
-            except Exception as e:
-                print(f"Error processing search query '{query}': {e}")
-                return jsonify({"error": "Failed to process search query"}), 500
-
-            return render_template(
-                "search.html",
-                search_results=search_results,
-                query=query,
-                page=page,
-                total_pages=total_pages
-            )
-
-
-
+        return render_template(
+            'search.html',
+            query=query,
+            search_results=paginated_movies,
+            page=page,
+            total_pages=total_pages
+        )
+    
     # @app.route("/popular", methods=["GET"])
     # def popular():
     #     return render_template("popular.html")  # TODO

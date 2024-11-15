@@ -22,26 +22,42 @@
 
             {% if search_results %}
             <h2 class="text-xl font-semibold mb-4">Results for "{{ query }}":</h2>
-            <div class="flex flex-wrap gap-4">
+            <div id="movie-container" class="flex flex-wrap gap-4">
                 {% for movie in search_results %}
-                    <div class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 p-4">
+                <div class="movie-card flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 p-4">
+                    <h3 class="text-lg font-bold">
                         <a href="{{ url_for('movie_info', movie_id=movie['film_id']) }}">
-                            <img src="{{ movie['poster_url'] }}" alt="{{ movie['movie_title'] }} poster" class="rounded mb-2" style="width: 150px; height: auto;">
-                            <h3 class="text-lg font-bold">{{ movie['movie_title'] }}</h3>
+                            {{ movie['movie_title'] }}
                         </a>
-                        <p class="text-sm">Year Released: {{ movie['year_released'] }}</p>
-                        <p class="text-sm">Genres: {{ movie['genres'] }}</p>
-                        <p class="text-sm">Language: {{ movie['original_language'] }}</p>
-                    </div>
-                {% endfor %}
+                    </h3>
+                    <p class="text-sm">Year Released: {{ movie['year_released'] }}</p>
+                    <p class="text-sm">Genres: {{ movie['genres'] }}</p>
+                    <p class="text-sm">Language: {{ movie['original_language'] }}</p>
+                    <img src="{{ movie['poster_url'] }}" alt="{{ movie['movie_title'] }} poster" class="movie-poster rounded mb-2" style="width: 150px; height: auto;">
+                </div>
+                {% endfor %}                
             </div>
-            
+        
+            <!-- Pagination -->
             <div class="pagination mt-4">
                 {% if page > 1 %}
-                    <a href="{{ url_for('search', query=query, page=page-1) }}" class="bg-primary text-white px-4 py-2 mr-2">Previous</a>
+                    <a href="{{ url_for('search', query=query, page=1) }}" class="bg-primary text-white px-4 py-2 mr-2">First</a>
+                    <a href="{{ url_for('search', query=query, page=page-1) }}" class="bg-primary text-white px-4 py-2">Previous</a>
                 {% endif %}
+            
+                {% for i in range(1, total_pages + 1) %}
+                    {% if i == page %}
+                        <span class="current-page bg-primary text-white px-4 py-2">{{ i }}</span>
+                    {% elif i == 1 or i == total_pages or (i >= page - 2 and i <= page + 2) %}
+                        <a href="{{ url_for('search', query=query, page=i) }}" class="bg-primary text-white px-4 py-2">{{ i }}</a>
+                    {% elif i == page - 3 or i == page + 3 %}
+                        <span class="text-gray-500 px-4">...</span>
+                    {% endif %}
+                {% endfor %}
+            
                 {% if page < total_pages %}
                     <a href="{{ url_for('search', query=query, page=page+1) }}" class="bg-primary text-white px-4 py-2">Next</a>
+                    <a href="{{ url_for('search', query=query, page=total_pages) }}" class="bg-primary text-white px-4 py-2 ml-2">Last</a>
                 {% endif %}
             </div>
         {% else %}
@@ -49,9 +65,32 @@
                 <p class="text-gray-500">No results found for "{{ query }}".</p>
             {% endif %}
         {% endif %}
+        
         </section>
     </main>
 </body>
 </html>
 
 {% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const movieCards = document.querySelectorAll('.movie-card');
+        movieCards.forEach(card => {
+            const filmId = card.getAttribute('data-film-id');
+            const posterElement = card.querySelector('.movie-poster');
+
+            // Fetch movie details (e.g., image and clickable link)
+            fetch(`/movie_details/${filmId}`)
+                .then(response => response.json())
+                .then(data => {
+                    posterElement.src = data.poster_url;
+                    posterElement.alt = `${data.movie_title} poster`;
+                    const titleElement = card.querySelector('h3');
+                    titleElement.innerHTML = `<a href="/movie_info/${filmId}">${data.movie_title}</a>`;
+                })
+                .catch(err => console.error('Failed to load movie details:', err));
+        });
+    });
+</script>
+
