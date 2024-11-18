@@ -33,3 +33,4 @@ if __name__ == "__main__":
     user_data = pd.read_csv("./data/sample_user_data.csv")
     unwatched_movies = get_unwatched_movies(user_data, movies)
     print(unwatched_movies[:50])
+    
