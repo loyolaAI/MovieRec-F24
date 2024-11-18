@@ -20,17 +20,17 @@ def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame) -> list:
     the user has not seen.
     """
     # get all movies have watched
-    watched_movies = user_data['film_id'].tolist()
+    watched_movies = user_data["film_id"].tolist()
 
     # Filter out movies that have already been watched
-    unwatched_movies = movies[~movies['film_id'].isin(watched_movies)]
-    
+    unwatched_movies = movies[~movies["film_id"].isin(watched_movies)]
+
     # Return the list
-    return unwatched_movies['film_id'].tolist()
+    return unwatched_movies["film_id"].tolist()
+
 
 if __name__ == "__main__":
     movies = pd.read_csv("./data/all_users_ratings.csv.gz", compression="gzip")
     user_data = pd.read_csv("./data/sample_user_data.csv")
     unwatched_movies = get_unwatched_movies(user_data, movies)
     print(unwatched_movies[:50])
-    
