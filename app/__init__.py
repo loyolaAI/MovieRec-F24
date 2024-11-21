@@ -31,7 +31,7 @@ def create_app():
     from app.db_models.user import User
     from app.db_models.movie_rating import MovieRating
     from app.db_models.password_reset_token import PasswordResetToken
-    from app.db_models.movie import Movie
+    from app.db_models.movie import Movie, SavedMovies
 
     login_manager = LoginManager()
     login_manager.login_view = "login"
