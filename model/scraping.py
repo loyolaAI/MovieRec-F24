@@ -122,7 +122,12 @@ def scrape_letterboxd_movie(movie_slug: str):
     genres = movie_data.get("genre", [])
     director = movie_data.get("director", [{}])[0].get("name", "N/A")
     rating = movie_data.get("aggregateRating", {}).get("ratingValue", 0.0)
-    poster_url = movie_data.get("image", "https://via.placeholder.com/150")
+
+    # Make the soup object to scrap the websites html
+    film_soup = BeautifulSoup(requests.get(url).text, "html.parser")
+    image_script_data = film_soup.select_one('script[type="application/ld+json"]')
+    json_data = json.loads(image_script_data.text.split(" */")[1].split("/* ]]>")[0])
+    poster_url = json_data.get("image", "")
 
     # Extract actors and create Wikipedia links for each
     actors = [
@@ -170,6 +175,7 @@ def scrape_letterboxd_movie(movie_slug: str):
 
     # Return the results in a dictionary
     return {
+        "id": movie_slug,
         "title": title,
         "year": year,
         "genres": genres,
@@ -252,7 +258,8 @@ def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Sample use
-    username = input("Please type your letterboxd username : ")
-    print(f"Now scraping : {username}")
-    df = scrape_and_make_dataframe(username.strip())
-    print(df)
+    # username = input("Please type your letterboxd username : ")
+    # print(f"Now scraping : {username}")
+    # df = scrape_and_make_dataframe(username.strip())
+    # print(df)
+    scrape_letterboxd_movie("joker-folie-a-deux")

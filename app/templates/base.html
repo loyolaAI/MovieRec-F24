@@ -1,9 +1,11 @@
 {% with auth = current_user %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="overscroll-none">
 <head>
   <meta charset="UTF-8">
-  <title>LAIC MovieRec-f24</title>
+  <title>
+    {% block title %}LAIC MovieRec{% endblock %}
+  </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
   <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>
@@ -15,101 +17,107 @@
       theme: {
         extend: {
           colors: {
-            "primary": 'var(--primary)',
-            "primary-muted": "var(--primary-muted)",
-            "secondary": "var(--secondary)",
-            "secondary-muted": "var(--secondary-muted)",
-            "destructive": "var(--destructive)"
+            "primary": 'hsl(var(--primary))',
+            "primary-muted": "hsl(var(--primary-muted))",
+            "secondary": "hsl(var(--secondary))",
+            "secondary-muted": "hsl(var(--secondary-muted))",
+            "destructive": "hsl(var(--destructive))"
           }
         }
-      }
+      },
+      
     }
   </script>
+    <style type="text/tailwindcss">
+      @tailwind base;
+      @tailwind components;
+      @tailwind utilities;
+      
+      @layer components {
+        /* ============ NAVIGATION  ============ */
+        .nav-container {
+          @apply flex flex-col items-center gap-2 [&>a]:nav-item font-semibold text-[0px] md:text-sm;
+
+          span {
+            @apply underline text-white/50;
+          }
+        }
+        
+        .nav-item {
+          @apply flex items-center gap-2 p-2 rounded-md hover:bg-white/5 relative [&>#text]:hidden [&>svg]:flex-shrink-0 w-10 md:w-full;
+        }
+
+        .active {
+          @apply relative bg-white/5 text-primary;
+
+          &::after {
+            @apply content-[''] absolute -right-[14px] md:-right-[18px] lg:-right-[34px] top-0 h-full w-[2px] bg-primary;
+          }
+        }
+        /* ============ NAVIGATION  ============ */
+      }
+
+      @layer base {
+        /* ============ AUTH ============ */
+        .notification {
+          @apply bg-primary text-white p-4 rounded-md;
+
+          &.error {
+            @apply bg-destructive;
+          }
+        }
+        /* ============ AUTH ============ */
+      }
+    </style>
 </head>
-<body class="grid-cols-12 mx-auto container">
+<body class="min-h-[100vh] flex">
   {% if auth['is_authenticated'] %}
-    
-    <aside class="col-span-2 p-10 border-x border-gray-500">
-      <nav class="flex flex-col h-full">
-        <div class="grid grid-cols-[48px_1fr] gap-2 color-white font-bold">
-          <img src="{{ url_for('static', filename='logo.png') }}" alt="LAIC Logo" class="size-12 row-span-2">
-          <span class="col-span-1 text-[20px] leading-5">LAIC</span>
-          <span class="col-span-1 text-[20px] leading-5">MovieRec</span>
-        </div>
-    
-        <div class="flex-1 flex flex-col gap-12 mt-24 font-semibold [&_ul_span]:mb-2 [&_ul_span]:text-gray-400 [&>ul>a.active]:text-primary [&>ul>a]:relative [&>ul>a:hover]:underline">
-          <ul class="flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
-            <span>Menu</span>
-            <a href="/">
-              <li>
-                <x-home-icon></x-home-icon> Home
-              </li>
-            </a>
-            <a href="/discover?username=your_username">
-              <li>
-                <x-compass-icon></x-compass-icon> Discover
-              </li>
-            </a>
-            <a href="/search">
-              <li>
-                <x-star-icon></x-star-icon> Search
-              </li>
-            </a>
-          </ul>
-    
-          <ul class="flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
-            <span>Library</span>
-    
-            <a href="/recent">
-              <li>
-                <x-clock3-icon></x-clock3-icon> Recent
-              </li>
-            </a>
-            <!-- <a href="/watchlist">
-              <li>
-                <x-plus-square-icon></x-plus-square-icon> Watchlist
-              </li>
-            </a> -->
-          <ul class="flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
-            <span>Account</span>
-            <a href="/profile">
-              <li>
-                <x-settings-icon></x-settings-icon> Settings
-              </li>
-            </a>
-            <a href="/search">
-              <li>
-                <x-star-icon></x-star-icon> Search
-              </li>
-            </a>
-            <a href="/watchlist">
-              <li>
-                <x-heart-icon></x-heart-icon> Watchlist
-              </li>
-            </a>
-            <!-- <a href="/watchlist">
-              <li>
-                <x-plus-square-icon></x-plus-square-icon> Watchlist
-              </li>
-            </a>
-            <a href="/completed">
-              <li>
-                <x-plus-check-icon></x-plus-check-icon> Completed
-              </li>
-            </a>  -->
-          </ul>
-        </div>
-      </nav>
-    </aside>
+    <nav class="h-[100vh] border-r-2 border-white/20 sticky left-0 top-0 flex flex-col flex-shrink-0 p-2 md:p-4 lg:p-8">
+      <!-- BRANDING -->
+      <div class="grid md:grid-cols-[48px_1fr] md:gap-2">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="LAIC MovieRec Logo" class="size-12"/>
+
+        <h1 class="text-base font-bold hidden md:block">
+          LAIC<br/> 
+          MovieRec
+        </h1>
+      </div>
+
+      <!-- NAV Links -->
+      <div class="h-full flex flex-col [&>*]:my-auto">
+        <ul class="nav-container">
+          <span class="w-full">Menu</span>
+          <a href="/">
+            <x-home-icon></x-home-icon> Home
+          </a>
+          <a href="/discover?username=your_username">
+            <x-compass-icon></x-compass-icon> Discover
+          </a>
+          <a href="/search">
+            <x-star-icon></x-star-icon> Search
+          </a>
+        </ul>
+  
+        <ul class="nav-container !mb-0">
+          <span class="w-full">General</span>
+  
+          <a href="/profile">
+            <x-settings-icon></x-settings-icon> Settings
+          </a>
+  
+          <a href="/logout">
+            <x-log-out-icon></x-log-out-icon> Logout
+          </a>
+        </ul>
+      </div>
+    </nav>
     <script>
       const pathname = window.location.pathname;
       document.querySelector(`[href="${pathname}"]`).classList.add('active');
     </script>
   {% endif %}
 
-  {% block content %}
-  
-  {% endblock %}
+  {% block content %}{% endblock %}
 </body>
 </html>
 {% endwith %}

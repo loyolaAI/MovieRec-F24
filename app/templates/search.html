@@ -15,26 +15,27 @@
     <main>
         <section class="content container mx-auto p-6">
             <h1 class="text-2xl font-bold mb-6">Search Movies</h1>
-            <form method="POST" action="{{ url_for('search') }}" class="mb-6 text-black">
+            <form method="POST" action="{{ url_for('search') }}" class="mb-6 text-black" autocomplete="off">
                 <input type="text" name="query" value="{{ query }}" placeholder="Enter movie title or genre" class="border rounded p-2 w-full text-black"/>
                 <button type="submit" class="bg-primary text-white px-4 py-2 mt-2">Search</button>
             </form>
 
             {% if search_results %}
             <h2 class="text-xl font-semibold mb-4">Results for "{{ query }}":</h2>
-            <div id="movie-container" class="flex flex-wrap gap-4">
+            <div id="movie-container" class="grid grid-cols-5 gap-4">
                 {% for movie in search_results %}
-                <div class="movie-card flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 p-4">
-                    <h3 class="text-lg font-bold">
-                        <a href="{{ url_for('movie_info', movie_id=movie['film_id']) }}">
-                            {{ movie['movie_title'] }}
-                        </a>
-                    </h3>
-                    <p class="text-sm">Year Released: {{ movie['year_released'] }}</p>
-                    <p class="text-sm">Genres: {{ movie['genres'] }}</p>
-                    <p class="text-sm">Language: {{ movie['original_language'] }}</p>
-                    <img src="{{ movie['poster_url'] }}" alt="{{ movie['movie_title'] }} poster" class="movie-poster rounded mb-2" style="width: 150px; height: auto;">
-                </div>
+                <a href="/movie_info/{{ movie['id'] }}" class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
+                    <img src="{{ movie['movie_image'] }}" alt="{{ movie['title'] }}" class="rounded-2xl min-h-[350px]"/>
+                    <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col p-4">
+                        <h2 class="text-lg font-bold mt-4">{{ movie['title'] }}</h2>
+                        <p class="text-sm">{{ movie['year'] }} | Rating: {{ movie['rating'] }}</p>
+                        <div class="flex gap-2 flex-wrap">
+                            {% for genre in movie['genres'][:3] %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-white/10 text-white">{{ genre }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </a>
                 {% endfor %}                
             </div>
         

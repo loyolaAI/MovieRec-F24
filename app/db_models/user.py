@@ -67,15 +67,15 @@ class User(UserMixin, db.Model):
     def delete_image(self) -> None:
         # Configuration
         cloudinary.config(
-            cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-            api_key=os.getenv("CLOUDINARY_API_KEY"),
             api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+            api_key=os.getenv("CLOUDINARY_API_KEY"),
+            cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
             secure=True,
         )
 
         cloudinary.uploader.destroy(self.profile_image_id)
-        self.profile_image_url = None
-        self.profile_image_id = None
+        self.profile_image_url = ""
+        self.profile_image_id = ""
         db.session.commit()
 
     def has_rated_movie(self, movie_id: str) -> bool:

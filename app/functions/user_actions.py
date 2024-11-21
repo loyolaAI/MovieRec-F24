@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash
 from app.db_models.user import User
-from app.db_models.movie import Movie, SavedMovies
+from app.db_models.movie import Movie
 from app.db_models.movie_rating import MovieRating
 from app.db_models.password_reset_token import PasswordResetToken as Pass
 from model.scraping import scrape_letterboxd
@@ -75,15 +75,12 @@ def send_password_reset_email(user: User, token: Pass) -> None:
 
 
 def scrape_user_ratings(user: User) -> None:
-    # movie_names, movie_slugs, movie_ratings, movie_images = scrape_letterboxd(
-    #     user.letterboxd_username
-    # )
+    user_data = scrape_letterboxd(user.letterboxd_username)
 
-    movie_data = scrape_letterboxd(user.letterboxd_username)
-    movie_names = movie_data["names"]
-    movie_slugs = movie_data["slugs"]
-    movie_ratings = movie_data["ratings"]
-    movie_images = movie_data["images"]
+    movie_names = user_data["names"]
+    movie_slugs = user_data["slugs"]
+    movie_ratings = user_data["ratings"]
+    movie_images = user_data["images"]
 
     # First create the movie objects for any movies that haven't been scraped yet
     movies = []
@@ -118,29 +115,12 @@ def scrape_user_ratings(user: User) -> None:
     ratings = []
     # Finally, create ratings
     for i in range(len(movie_slugs)):
-        try:
-            rating = (
-                int(float(movie_ratings[i])) / 2
-            )  # Convert to float, then divide to get a 5-star rating
-            ratings.append(create_rating(user, movies[i], rating))
-        except ValueError:
-            print(f"Skipping invalid rating: {movie_ratings[i]}")
-            continue
+        ratings.append(
+            create_rating(user, movies[i], (movie_ratings[i] / 2))
+        )  # Letterboxd ratings are out of 10, so divide by 2 to get a 5-star rating
 
     db.session.add_all(movies)
     db.session.add_all(ratings)
-
-
-def add_saved_movie(user: User, movie: Movie) -> None:
-    saved_movie = SavedMovies(id=cuid_generator(), movie_id=movie.movie_id, user_id=user.id)
-    db.session.add(saved_movie)
-    db.session.commit()
-
-
-def remove_saved_movie(user: User, movie: Movie) -> None:
-    saved_movie = SavedMovies.query.filter_by(movie_id=movie.movie_id, user_id=user.id).first()
-    db.session.delete(saved_movie)
-    db.session.commit()
 
 
 def construct_reset_password_email(token):
