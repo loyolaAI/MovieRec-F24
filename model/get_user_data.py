@@ -12,10 +12,25 @@ def get_movie_info(user_data: pd.DataFrame) -> pd.DataFrame:
     print("hello from get_movie_info")
 
 
-def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame, accuracy: float) -> list:
+def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame) -> list:
     """
     To actually recommend movies. we take all of the movies the user has not watched
     and put them into model that we built with the movies they have not watched. This method
     should be as simple as taking the .csv file with all the movies and getting only movies
     the user has not seen.
     """
+    # get all movies have watched
+    watched_movies = user_data["film_id"].tolist()
+
+    # Filter out movies that have already been watched
+    unwatched_movies = movies[~movies["film_id"].isin(watched_movies)]
+
+    # Return the list
+    return unwatched_movies["film_id"].tolist()
+
+
+if __name__ == "__main__":
+    movies = pd.read_csv("./data/all_users_ratings.csv.gz", compression="gzip")
+    user_data = pd.read_csv("./data/sample_user_data.csv")
+    unwatched_movies = get_unwatched_movies(user_data, movies)
+    print(unwatched_movies[:50])
