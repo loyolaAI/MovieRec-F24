@@ -15,6 +15,11 @@
         </style>
         <img src="{{ movie.movie_image }}" alt="{{ movie.title }}" class="rounded-lg w-full h-auto mb-4 shadow-lg">
         <div class="text-gray-700">
+            <form method="POST" action="{{ url_for('save_movie', movie_id=movie.id) }}">
+                {{ url_for('save_movie', movie_id=movie.id) }}
+                {{ movie.id }}
+                <button type="submit">Save Movie to Watchlist</button>
+            </form>
             <p class="mb-2"><strong>Rating:</strong>
                 {% set full_stars = movie.rating | int %}
                 {% set decimal_part = movie.rating - full_stars %}

@@ -181,6 +181,11 @@ def scrape_letterboxd_movie(movie_slug: str):
         "reviews": reviews,
     }
 
+def search_movies_from_csv(query):
+    df = pd.read_csv('model/data/movies.csv')
+    filtered = df[df['movie_title'].str.contains(query, case=False, na=False)]
+    return filtered.to_dict('records')
+
 
 def scrape_recommended_movies(movie_slugs):
     movie_data = []  # List to hold data for each recommended movie
