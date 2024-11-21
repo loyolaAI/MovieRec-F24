@@ -15,6 +15,7 @@ class Movie(db.Model):
     # Back reference to MovieRating
     ratings: Mapped[list["MovieRating"]] = relationship("MovieRating", back_populates="movie")  # type: ignore
 
+
 class SavedMovies(db.Model):
     __tablename__ = "saved_movies"
 

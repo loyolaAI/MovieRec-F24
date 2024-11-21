@@ -130,15 +130,18 @@ def scrape_user_ratings(user: User) -> None:
     db.session.add_all(movies)
     db.session.add_all(ratings)
 
+
 def add_saved_movie(user: User, movie: Movie) -> None:
     saved_movie = SavedMovies(id=cuid_generator(), movie_id=movie.movie_id, user_id=user.id)
     db.session.add(saved_movie)
     db.session.commit()
 
+
 def remove_saved_movie(user: User, movie: Movie) -> None:
     saved_movie = SavedMovies.query.filter_by(movie_id=movie.movie_id, user_id=user.id).first()
     db.session.delete(saved_movie)
     db.session.commit()
+
 
 def construct_reset_password_email(token):
     username = token.user.username

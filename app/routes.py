@@ -2,7 +2,12 @@ from flask import request, jsonify, render_template, redirect, url_for, flash, a
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
 from datetime import datetime
-from model.scraping import scrape_letterboxd_movie, scrape_letterboxd, scrape_recommended_movies, search_movies_from_csv
+from model.scraping import (
+    scrape_letterboxd_movie,
+    scrape_letterboxd,
+    scrape_recommended_movies,
+    search_movies_from_csv,
+)
 from model.main import get_recommendations
 import csv
 from math import ceil
@@ -68,7 +73,7 @@ def init_routes(app):
             "discover.html", recommendations=recommendations, username=current_user.username
         )
 
-    @app.route('/search', methods=['GET', 'POST'])
+    @app.route("/search", methods=["GET", "POST"])
     def search():
         search_results = []
         query = request.form.get("query") if request.method == "POST" else ""
@@ -87,15 +92,14 @@ def init_routes(app):
                 for movie in movies
                 if query.lower() in movie["movie_title"].lower()
                 or query.lower() in movie["genres"].lower()
-
             ]
 
         return render_template(
-            'search.html',
+            "search.html",
             query=query,
             search_results=paginated_movies,
             page=page,
-            total_pages=total_pages
+            total_pages=total_pages,
         )
 
     @app.route("/recent", methods=["GET"])
@@ -123,9 +127,8 @@ def init_routes(app):
         sort_by = request.args.get("sort", "recent")  # Default sort is "recent"
 
         # Fetch saved movies for the current user
-        saved_movies_query = (
-            db.session.query(SavedMovies)
-            .filter(SavedMovies.user_id == current_user.id)
+        saved_movies_query = db.session.query(SavedMovies).filter(
+            SavedMovies.user_id == current_user.id
         )
 
         # Apply sorting
@@ -136,10 +139,8 @@ def init_routes(app):
 
         saved_movies = saved_movies_query.all()
 
-        return render_template(
-            "watchlist.html", saved_movies=saved_movies, sort_by=sort_by
-        )
-    
+        return render_template("watchlist.html", saved_movies=saved_movies, sort_by=sort_by)
+
     @app.route("/save_movie/<movie_id>", methods=["POST"])
     def save_movie(movie_id):
         # Check if the movie is already saved by the user
@@ -170,7 +171,6 @@ def init_routes(app):
 
         flash("Movie saved successfully!", "success")
         return redirect(url_for("movie_info", movie_id=movie_id))
-
 
     # ================== Authentication Related ==================
     @app.route("/profile")
