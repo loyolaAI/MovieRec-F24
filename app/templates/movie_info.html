@@ -15,6 +15,11 @@
         </style>
         <img src="{{ movie.movie_image }}" alt="{{ movie.title }}" class="rounded-lg w-full h-auto mb-4 shadow-lg">
         <div class="text-gray-700">
+            <form method="POST" action="{{ url_for('save_movie', movie_id=movie.id) }}">
+                {{ url_for('save_movie', movie_id=movie.id) }}
+                {{ movie.id }}
+                <button type="submit">Save Movie to Watchlist</button>
+            </form>
             <p class="mb-2"><strong>Rating:</strong>
                 {% set full_stars = movie.rating | int %}
                 {% set decimal_part = movie.rating - full_stars %}
@@ -59,6 +64,29 @@
             <p class="text-gray-600">No reviews available.</p>
         {% endif %}
     </section>    
+    <section class="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl mt-6">
+        <h2 class="text-xl font-bold mb-4">Recommendations</h2>
+        <div class="grid grid-cols-2 gap-4">
+            {% for rec in recommendations %}
+                <a href="{{ url_for('movie_info', movie_id=rec.movie_id) }}" class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
+                    <img src="{{ rec.image }}" alt="{{ rec.title }}" class="rounded-2xl"/>
+                    <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col gap-2 p-4">
+                        <h2 class="text-lg font-bold mt-4">{{ rec.title }}</h2>
+                        {% if rec.rating %}
+                            <p class="text-sm">{{ rec.rating }}★</p>
+                        {% endif %}
+                    </div>
+                </a>
+            {% else %}
+                <p>No recommendations available.</p>
+            {% endfor %}
+        </div>
+    </section>
+    <section class="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl mt-6">
+        <h2 class="text-xl font-bold mb-4">IMDB Link</h2>
+        <a href="{{ movie.imdb_link }}" target="_blank" class="text-secondary hover:underline">{{ movie.imdb_link }}</a>
+    </section>
+
 </main>
 
 {% endblock %}

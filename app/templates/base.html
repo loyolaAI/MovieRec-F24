@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Movie Streaming Dashboard</title>
+  <title>LAIC MovieRec-f24</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
   <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>
@@ -50,6 +50,11 @@
                 <x-compass-icon></x-compass-icon> Discover
               </li>
             </a>
+            <a href="/search">
+              <li>
+                <x-star-icon></x-star-icon> Search
+              </li>
+            </a>
           </ul>
     
           <ul class="flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
@@ -60,17 +65,29 @@
                 <x-clock3-icon></x-clock3-icon> Recent
               </li>
             </a>
-            <a href="/top">
+            <!-- <a href="/watchlist">
               <li>
-                <x-star-icon></x-star-icon> Top Rated
+                <x-plus-square-icon></x-plus-square-icon> Watchlist
+              </li>
+            </a> -->
+          <ul class="flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
+            <span>Account</span>
+            <a href="/profile">
+              <li>
+                <x-settings-icon></x-settings-icon> Settings
               </li>
             </a>
-            <a href="/playlists">
+            <a href="/search">
               <li>
-                <x-heart-icon></x-heart-icon> Playlists
+                <x-star-icon></x-star-icon> Search
               </li>
             </a>
             <a href="/watchlist">
+              <li>
+                <x-heart-icon></x-heart-icon> Watchlist
+              </li>
+            </a>
+            <!-- <a href="/watchlist">
               <li>
                 <x-plus-square-icon></x-plus-square-icon> Watchlist
               </li>
@@ -79,23 +96,7 @@
               <li>
                 <x-plus-check-icon></x-plus-check-icon> Completed
               </li>
-            </a>
-          </ul>
-    
-          <ul class="mt-auto flex flex-col [&>a]:py-1.5 [&>a>li]:grid [&>a>li]:grid-cols-[24px_1fr] [&>a>li]:gap-3">
-            <span>General</span>
-    
-            <a href="/profile">
-              <li>
-                <x-settings-icon></x-settings-icon> Settings
-              </li>
-            </a>
-    
-            <a href="/logout">
-              <li>
-                <x-log-out-icon></x-log-out-icon> Logout
-              </li>
-            </a>
+            </a>  -->
           </ul>
         </div>
       </nav>
@@ -109,46 +110,6 @@
   {% block content %}
   
   {% endblock %}
-
-  {% if auth['is_authenticated'] %}
-    <aside class="col-span-3 p-10 border-x border-gray-500">
-      <div class="flex justify-end items-center flex-col gap-2">
-        <div class="relative dropdown-trigger">
-          <label class="grid grid-cols-[auto_56px_32px] p-4 cursor-pointer text-end transition-color rounded-lg transition-colors hover:bg-white/10 has-[input:checked]:bg-white/10 peer group">
-            <span>{{ auth['username'] }}</span>
-  
-            <img
-            src="{{ auth['profile_image_url'] }}"
-            alt='{% for i in range(( auth["username"] ).split(" ")|length)[:2] %}{{( auth["username"] ).split(" ")[i][0]}}{% endfor %}'
-            class="size-12 flex-shrink-0 row-span-2 ml-2 rounded-lg bg-white/10 text-center leading-[48px] font-semibold"
-            >
-            <x-down-icon class="row-span-2 flex items-center ml-2 transition-transform group-has-[input:checked]:rotate-180"></x-down-icon>
-  
-            <span class="text-gray-400">{{ auth['email'] }}</span>
-            <input type="checkbox" class="hidden" autocomplete="off" name="dropdown"/>
-          </label>
-          <div class="absolute flex flex-col [&>a]:grid [&>a]:grid-cols-[20px_1fr] [&>a]:gap-2 top-[110px] right-0 p-4 rounded-lg border border-primary w-full -translate-y-10 opacity-0 pointer-events-none select-none transition-all peer-has-[input:checked]:translate-y-0 peer-has-[input:checked]:opacity-100 peer-has-[input:checked]:pointer-events-auto peer-has-[input:checked]:select-auto">
-            <a href="/profile" class="py-1 px-2 hover:underline">
-              <x-user-icon></x-user-icon> Profile
-            </a>
-            <a href="/logout" class="py-1 px-2 hover:underline">
-              <x-log-out-icon></x-log-out-icon>Logout
-            </a>
-          </div>
-        </div>
-      </div>
-    </aside>
-    <script>
-      const dropdownTrigger = document.querySelector('.dropdown-trigger');
-      const dropdownInput = document.querySelector('input[name="dropdown"]');
-    
-      document.addEventListener('click', (e) => {
-        if (!dropdownTrigger.contains(e.target)) {
-          dropdownInput.checked = false;
-        }
-      });
-    </script>
-  {% endif %}
 </body>
 </html>
 {% endwith %}

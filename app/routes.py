@@ -2,8 +2,15 @@ from flask import request, jsonify, render_template, redirect, url_for, flash, a
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
 from datetime import datetime
-from model.scraping import scrape_letterboxd_movie, scrape_letterboxd, scrape_recommended_movies
+from model.scraping import (
+    scrape_letterboxd_movie,
+    scrape_letterboxd,
+    scrape_recommended_movies,
+    search_movies_from_csv,
+)
 from model.main import get_recommendations
+import csv
+from math import ceil
 
 
 # from model.main import get_recommendations
@@ -15,7 +22,7 @@ sys.path.append("..")
 from app.functions.movie_recommender import movie_recommendation
 from app.db_models.user import User
 from app.db_models.password_reset_token import PasswordResetToken as Pass
-from app.db_models.movie import Movie
+from app.db_models.movie import Movie, SavedMovies
 from app.db_models.movie_rating import MovieRating
 
 from app.functions.user_actions import (
@@ -66,6 +73,35 @@ def init_routes(app):
             "discover.html", recommendations=recommendations, username=current_user.username
         )
 
+    @app.route("/search", methods=["GET", "POST"])
+    def search():
+        search_results = []
+        query = request.form.get("query") if request.method == "POST" else ""
+
+        # Read movies from CSV
+        movies = []
+        with open("model/data/movies.csv", "r") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                movies.append(row)
+
+        # Filter movies if there's a search query
+        if query:
+            search_results = [
+                movie
+                for movie in movies
+                if query.lower() in movie["movie_title"].lower()
+                or query.lower() in movie["genres"].lower()
+            ]
+
+        return render_template(
+            "search.html",
+            query=query,
+            search_results=paginated_movies,
+            page=page,
+            total_pages=total_pages,
+        )
+
     @app.route("/recent", methods=["GET"])
     def recent():
         return render_template("recent.html", movies=User.get_rated_movies(current_user))
@@ -76,30 +112,65 @@ def init_routes(app):
             print("movie_id:", movie_id)
 
             movie_data = scrape_letterboxd_movie(movie_id)
+            imdb_link = movie_data.get("imdb_link")
             if not movie_data or not movie_data.get("title"):
                 return render_template("error.html", error="Movie data not found")
             print("Final movie data:", movie_data)
-            return render_template("movie_info.html", movie=movie_data)
+            return render_template("movie_info.html", movie=movie_data, movie_id=movie_id)
         except Exception as e:
             print(e)
             print("movie_id:", movie_id)
-            return render_template("error.html", error=e)
+            return render_template("error.html", error=e, movie_id=movie_id)
 
-    # # Fetch Movie Data
-    # @app.route("/movie/<int:movie_id>", methods=["GET"])
-    # def fetch_movie_data(movie_id):
-    #     # Validity Check
-    #     # Fetch using 'movie_data' function
-    #     # Throw exception if there is not movie data
-    #     return
+    @app.route("/watchlist", methods=["GET"])
+    def saved_movies():
+        sort_by = request.args.get("sort", "recent")  # Default sort is "recent"
 
-    # Search For Movie(s)
-    @app.route("/search", methods=["GET"])
-    def search():
-        # Validity Check
-        # Movie Search
-        # Throw exception if there is no movie, or give similar
-        return
+        # Fetch saved movies for the current user
+        saved_movies_query = db.session.query(SavedMovies).filter(
+            SavedMovies.user_id == current_user.id
+        )
+
+        # Apply sorting
+        if sort_by == "alphabetical":
+            saved_movies_query = saved_movies_query.order_by(SavedMovies.movie_title.asc())
+        else:  # Default sorting by most recent
+            saved_movies_query = saved_movies_query.order_by(SavedMovies.movie_id.desc())
+
+        saved_movies = saved_movies_query.all()
+
+        return render_template("watchlist.html", saved_movies=saved_movies, sort_by=sort_by)
+
+    @app.route("/save_movie/<movie_id>", methods=["POST"])
+    def save_movie(movie_id):
+        # Check if the movie is already saved by the user
+        existing_saved_movie = (
+            db.session.query(SavedMovies)
+            .filter_by(user_id=current_user.id, movie_id=movie_id)
+            .first()
+        )
+        if existing_saved_movie:
+            flash("This movie is already saved!", "info")
+            return redirect(url_for("movie_info", movie_id=movie_id))
+
+        # Fetch movie data (e.g., from an API or scrape function)
+        movie_data = scrape_letterboxd_movie(movie_id)
+        if not movie_data:
+            flash("Failed to save movie. Please try again.", "error")
+            return redirect(url_for("movie_info", movie_id=movie_id))
+
+        # Create a new SavedMovies entry
+        new_saved_movie = SavedMovies(
+            movie_id=movie_id,
+            user_id=current_user.id,
+            movie_title=movie_data.get("title"),
+            movie_image=movie_data.get("movie_image"),
+        )
+        db.session.add(new_saved_movie)
+        db.session.commit()
+
+        flash("Movie saved successfully!", "success")
+        return redirect(url_for("movie_info", movie_id=movie_id))
 
     # ================== Authentication Related ==================
     @app.route("/profile")
