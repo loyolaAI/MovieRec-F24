@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Recent Movies{% endblock %}
+{% block title %}Your Recent Ratings{% endblock %}
 {% block content %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Recent Movies - Movie Streaming Dashboard</title>
+    <title>Recent Movies - MovieRec-f24</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>
@@ -32,17 +32,21 @@
 <body>
     <main>
         <section class="content container mx-auto p-6">
-            <h1 class="text-2xl font-bold mb-6">Recent Movies</h1>
+            <h1 class="text-2xl font-bold mb-6">Your Ratings</h1>
             <div class="col-span-7 flex flex-wrap gap-4">
-                {% for movie in movies[:20] | reverse %} <!-- Display up to 20 recent movies -->
-                <a href="{{ url_for('movie', movie_id=movie['movie_id']) }}" class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
-                    <img src="{{ movie['movie_image'] }}" alt="{{ movie['movie_title'] }}" class="rounded-2xl"/>
-                    <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col gap-2 p-4">
-                        <h2 class="text-lg font-bold mt-4">{{ movie['movie_title'] }}</h2>
-                        <p class="text-sm">{{ movie['year'] }}{{ movie['movie_ratings'] }}</p>
-                    </div>
-                </a>
+                {% for movie in movies[:20] | reverse %}
+                    <a href="{{ url_for('movie_info', movie_id=movie['movie_id']) }}" class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
+                        <img src="{{ movie['movie_image'] }}" alt="{{ movie['movie_title'] }}" class="rounded-2xl"/>
+                        <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col gap-2 p-4">
+                            <h2 class="text-lg font-bold mt-4">{{ movie['movie_title'] }}</h2>
+                            {% set user_rating = current_user.get_rating(movie['movie_id']) %}
+                            {% if user_rating %}
+                                <p class="text-sm">{{ user_rating._rating }}★</p>
+                            {% endif %}
+                        </div>
+                    </a>
                 {% endfor %}
+
             </div>
         </section>
     </main>

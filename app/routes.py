@@ -1,8 +1,20 @@
 from flask import request, jsonify, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
-from model.scraping import scrape_letterboxd_movie, scrape_letterboxd, scrape_recommended_movies
+from datetime import datetime, timezone
+import requests
+from model.scraping import (
+    scrape_letterboxd_movie,
+    scrape_letterboxd,
+    scrape_recommended_movies,
+    search_movies_from_csv,
+)
 from model.main import get_recommendations
+import csv
+from math import ceil
+
+
+# from model.main import get_recommendations
 from datetime import datetime, timezone
 import requests
 
@@ -96,17 +108,66 @@ def init_routes(app):
             "discover.html", recommendations=recommendations, username=current_user.username
         )
 
+    @app.route("/search", methods=["GET", "POST"])
+    def search():
+        search_results = []
+        query = request.form.get("query") if request.method == "POST" else request.args.get("query")
+        page = int(request.args.get("page")) if request.args.get("page") is not None else 1
+
+        # Read movies from CSV
+        movies = []
+        with open("model/data/movies.csv", "r") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                movies.append(row)
+
+        # Filter movies if there's a search query
+        if query:
+            search_results = [
+                movie
+                for movie in movies
+                if query.lower() in movie["movie_title"].lower()
+                or query.lower() in movie["genres"].lower()
+            ]
+
+        movie_data = []
+        for movie in search_results[10 * (page - 1) : 10 * page]:
+            movie_data.append(scrape_letterboxd_movie(movie["film_id"]))
+
+        return render_template(
+            "search.html",
+            query=query,
+            search_results=movie_data,
+            total_pages=10,
+            page=1,
+        )
+
     @app.route("/recent", methods=["GET"])
     def recent():
         return render_template("recent.html", movies=User.get_rated_movies(current_user))
 
-    # Search For Movie(s)
-    @app.route("/search", methods=["GET"])
-    def search():
-        # Validity Check
-        # Movie Search
-        # Throw exception if there is no movie, or give similar
-        return
+    @app.route("/movie_info/<movie_id>", methods=["GET"])
+    def movie_info(movie_id):
+        try:
+            # print("movie_id:", movie_id)
+
+            movie_data = scrape_letterboxd_movie(movie_id)
+            if not movie_data or not movie_data.get("title"):
+                return render_template("error.html", error="Movie data not found")
+            # print("Final movie data:", movie_data)
+            return render_template("movie_info.html", movie=movie_data)
+        except Exception as e:
+            print(e)
+            print("movie_id:", movie_id)
+            return render_template("error.html", error=e)
+
+    # # Fetch Movie Data
+    # @app.route("/movie/<int:movie_id>", methods=["GET"])
+    # def fetch_movie_data(movie_id):
+    #     # Validity Check
+    #     # Fetch using 'movie_data' function
+    #     # Throw exception if there is not movie data
+    #     return
 
     # ================== Authentication Related ==================
     @app.errorhandler(404)
