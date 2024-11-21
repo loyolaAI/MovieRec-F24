@@ -116,7 +116,7 @@ def scrape_user_ratings(user: User) -> None:
     # Finally, create ratings
     for i in range(len(movie_slugs)):
         ratings.append(
-            create_rating(user, movies[i], int(movie_ratings[i], 10) / 2)
+            create_rating(user, movies[i], (movie_ratings[i] / 2))
         )  # Letterboxd ratings are out of 10, so divide by 2 to get a 5-star rating
 
     db.session.add_all(movies)
