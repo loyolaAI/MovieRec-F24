@@ -86,6 +86,7 @@ def init_routes(app):
                 for movie in movies
                 if query.lower() in movie["movie_title"].lower()
                 or query.lower() in movie["genres"].lower()
+
             ]
 
         return render_template("search.html", search_results=search_results, query=query)
@@ -104,10 +105,11 @@ def init_routes(app):
             print("movie_id:", movie_id)
 
             movie_data = scrape_letterboxd_movie(movie_id)
+            imdb_link = movie_data.get("imdb_link")
             if not movie_data or not movie_data.get("title"):
                 return render_template("error.html", error="Movie data not found")
             print("Final movie data:", movie_data)
-            return render_template("movie_info.html", movie=movie_data)
+            return render_template("movie_info.html", movie=movie_data, imdb_link=imdb_link)
         except Exception as e:
             print(e)
             print("movie_id:", movie_id)
