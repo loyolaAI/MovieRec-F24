@@ -43,16 +43,12 @@ def ensure_movie_in_dataset(movie_title, movies):
     if movie_title not in movies["movie_title"].values:
         print(f"'{movie_title}' not found in dataset. Adding placeholder entry.")
         placeholder = pd.DataFrame([{
-            "film_id": "placeholder-id",
-            "rating_count": 0,
-            "genres": "",
-            "imdb_link": "",
-            "movie_title": movie_title,
-            "original_language": "unknown",
-            "year_released": None,
-            "combined_features": ""
-        }])  # Convert to DataFrame
-        movies = pd.concat([movies, placeholder], ignore_index=True)  # Concatenate as DataFrame
+            col: None for col in movies.columns  # Ensure placeholder matches movies DataFrame structure
+        }])
+        placeholder["movie_title"] = movie_title  # Set the title
+        placeholder["film_id"] = "placeholder-id"  # Add unique ID
+        placeholder["combined_features"] = ""  # Default empty features
+        movies = pd.concat([movies, placeholder], ignore_index=True)
     return movies
 
 def get_recommendations(title, movies, tfidf_matrix, top_n=5):
@@ -73,7 +69,7 @@ def get_recommendations(title, movies, tfidf_matrix, top_n=5):
     
     return recommendations
 
-if __name__ == "__main__":
+def get_movie_recommendations(movie_title, file_path="model/data/movies.csv", top_n=5):
     # Load the dataset
     movies = load_data(file_path)
 
@@ -81,20 +77,20 @@ if __name__ == "__main__":
     movies = preprocess_data(movies)
 
     # Ensure the input movie is in the dataset
-    movie_title = "Aha"  # Change this to test other titles
     movies = ensure_movie_in_dataset(movie_title, movies)
-
-    # Subsample for faster development (remove or increase limit for production)
-    # movies = movies.sample(10000, random_state=42)
 
     # Create the TF-IDF matrix
     tfidf, tfidf_matrix = create_tfidf_matrix(movies)
 
     # Get recommendations for a specific movie
     try:
-        recommendations = get_recommendations(movie_title, movies, tfidf_matrix, top_n=5)
-        print(f"Top recommendations for '{movie_title}' (film_id):")
-        for film_id in recommendations:
-            print(film_id)
+        recommendations = get_recommendations(movie_title, movies, tfidf_matrix, top_n=top_n)
+        return recommendations
     except ValueError as e:
-        print(e)
+        return str(e)
+    
+movie_title = "Aha"
+recommendations = get_movie_recommendations(movie_title)
+print(f"Top 5 recommendations for '{movie_title}':")
+for film_id in recommendations:
+    print(film_id)
