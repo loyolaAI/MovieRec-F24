@@ -1,92 +1,61 @@
 {% extends 'base.html' %}
 {% block title %}{{ movie.title }}{% endblock %}
 {% block content %}
-
-<main class="bg-gray-100 text-primary flex-grow container mx-auto p-6 flex flex-col items-center">
-    <section class="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl">
-        <h1 class="text-2xl font-bold mb-4">{{ movie.title }}</h1>
-        <style>
-            .star {
-                color: #f7d070;
-            }
-            .filled {
-                color: #f7d070;
-            }
-        </style>
-        <img src="{{ movie.movie_image }}" alt="{{ movie.title }}" class="rounded-lg w-full h-auto mb-4 shadow-lg">
-        <div class="text-gray-700">
-            <form method="POST" action="{{ url_for('save_movie', movie_id=movie.id) }}">
-                {{ url_for('save_movie', movie_id=movie.id) }}
-                {{ movie.id }}
-                <button type="submit">Save Movie to Watchlist</button>
-            </form>
-            <p class="mb-2"><strong>Rating:</strong>
-                {% set full_stars = movie.rating | int %}
-                {% set decimal_part = movie.rating - full_stars %}
-                
-                {% for _ in range(full_stars) %}
-                    <span class="star filled">★</span>
-                {% endfor %}
-                
-                {% if decimal_part > 0 %}
-                    <span class="star filled">☆</span> <!-- This will represent the decimal star -->
-                {% endif %}
-                
-                {{ movie.rating }} / 5
-            </p>
-            <p class="mb-2"><strong>Year:</strong> {{ movie.year }}</p>
-            <p class="mb-2"><strong>Genres:</strong> {{ movie.genres | join(', ') }}</p>
-            <p class="mb-4"><strong>Director:</strong> 
-                <a href="https://en.wikipedia.org/wiki/{{ movie.director.replace(' ', '_') }}" target="_blank" class="text-secondary hover:underline">{{ movie.director }}</a>
-            </p>
-            <p><strong>Summary:</strong> {{ movie.summary }}</p>
-            <br>
-            <p class="mb-4">
-                <strong>Actors:</strong>
-                {% for actor in movie.actors[:20] %}
-                    <a href="{{ actor.wiki_url }}" target="_blank" class="text-secondary hover:underline">{{ actor.name }}</a>{% if not loop.last %}, {% endif %}
-                {% endfor %}
-            </p>
-            
-        </div>
-    </section>
-
-    <section class="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl mt-6">
-        <h2 class="text-xl font-bold mb-4">Reviews</h2>
-        {% if movie.reviews %}
-            {% for review in movie.reviews %}
-                <div class="border-b py-2">
-                    <p class="font-semibold">{{ review.reviewer }}</p>
-                    <p class="text-gray-600">{{ review.content }}</p>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-gray-600">No reviews available.</p>
+<main class="container mx-auto flex flex-col gap-2 p-2 md:p-4 lg:p-8">
+  <h1 class="text-2xl font-bold mb-4">{{ movie.title }}</h1>
+  <section class="bg-black/10 p-4 md:p-8 rounded-lg flex gap-8 shadow-lg">
+    <style>
+      .star {
+        color: #f7d070;
+      }
+    </style>
+    <img src="{{ movie.movie_image }}" alt="{{ movie.title }}" class="rounded-lg w-3/4 h-auto mb-4 shadow-lg">
+    <div class="text-white/50 [&_strong]:text-white space-y-2">
+      <p class="text-lg font-bold text-white"><strong>{{ movie.title }}</strong></p>
+      <p><strong>Rating:</strong>
+        {% set full_stars = movie.rating | int %}
+        {% set decimal_part = movie.rating - full_stars %}
+        
+        {% for _ in range(full_stars) %}
+            <span class="star">★</span>
+        {% endfor %}
+        
+        {% if decimal_part > 0 %}
+            <span class="star">☆</span> <!-- This will represent the decimal star -->
         {% endif %}
-    </section>    
-    <section class="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl mt-6">
-        <h2 class="text-xl font-bold mb-4">Recommendations</h2>
-        <div class="grid grid-cols-2 gap-4">
-            {% for rec in recommendations %}
-                <a href="{{ url_for('movie_info', movie_id=rec.movie_id) }}" class="flex flex-col bg-white/10 rounded-2xl h-fit border-2 border-white/50 relative overflow-clip shrink-0">
-                    <img src="{{ rec.image }}" alt="{{ rec.title }}" class="rounded-2xl"/>
-                    <div class="absolute top-1/2 left-0 bg-gradient-to-b from-black/0 to-black/100 h-1/2 w-full flex justify-end flex-col gap-2 p-4">
-                        <h2 class="text-lg font-bold mt-4">{{ rec.title }}</h2>
-                        {% if rec.rating %}
-                            <p class="text-sm">{{ rec.rating }}★</p>
-                        {% endif %}
-                    </div>
-                </a>
-            {% else %}
-                <p>No recommendations available.</p>
-            {% endfor %}
-        </div>
-    </section>
-    <section class="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl mt-6">
-        <h2 class="text-xl font-bold mb-4">IMDB Link</h2>
-        <a href="{{ movie.imdb_link }}" target="_blank" class="text-secondary hover:underline">{{ movie.imdb_link }}</a>
-    </section>
+        
+        {{ movie.rating }} / 5
+      </p>
+      <p><strong>Year:</strong> {{ movie.year }}</p>
+      <p><strong>Genres:</strong> {{ movie.genres | join(', ') }}</p>
+      <p class="mb-4"><strong>Director:</strong> 
+        <a href="https://en.wikipedia.org/wiki/{{ movie.director.replace(' ', '_') }}" target="_blank" class="text-primary hover:underline">{{ movie.director }}</a>
+      </p>
+      <p><strong>Summary:</strong> {{ movie.summary }}</p>
+      <br>
+      <p class="mb-4">
+        <strong>Actors:</strong>
+        {% for actor in movie.actors[:20] %}
+          <a href="{{ actor.wiki_url }}" target="_blank" class="text-primary hover:underline">{{ actor.name }}</a>{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+        
+    </div>
+  </section>
 
+  <h2 class="text-xl font-bold mt-8">Reviews</h2>
+  <section class="bg-black/10 p-4 md:p-8 rounded-lg flex flex-col gap-4 shadow-lg">
+    {% if movie.reviews %}
+      {% for review in movie.reviews %}
+        <div class="border-b py-2">
+          <p class="font-semibold">{{ review.reviewer }}</p>
+          <p class="text-white/75">{{ review.content }}</p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-white/75">No reviews available.</p>
+    {% endif %}
+  </section>    
 </main>
 
 {% endblock %}

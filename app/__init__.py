@@ -20,7 +20,6 @@ db = SQLAlchemy(model_class=Base)
 
 def create_app():
     app = Flask(__name__)
-
     app.config["SECRET_KEY"] = "d2d2ad7660c18bdc8fc43e835c05a5f4928489eb0490aa00b862f2e1e7b74e15"
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
@@ -32,7 +31,7 @@ def create_app():
     from app.db_models.user import User
     from app.db_models.movie_rating import MovieRating
     from app.db_models.password_reset_token import PasswordResetToken
-    from app.db_models.movie import Movie, SavedMovies
+    from app.db_models.movie import Movie
 
     login_manager = LoginManager()
     login_manager.login_view = "login"

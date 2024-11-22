@@ -2,96 +2,119 @@
 
 {% block content %}
 {% with auth = current_user %}
-<main class="container p-16 col-span-7">
-  <h1 style="width: 100%; margin-bottom: 2rem;">Welcome back, {{ auth['username'] }}</h1>
-  <form class="auth-card" style="width: 100%; max-width: 100%; margin-top: 1rem; background: rgba(255,255,255,0.05);" autocomplete="off" method="POST" action="/profile" enctype="multipart/form-data">
-    <div class="profile-form-container">
-      <div>
-        <!-- Profile Image -->
-        <label for="pfp" class="img-upload">
-          <input type="file" id="pfp" name="pfp" accept="image/*" style="width: 256px; height: 256px; z-index: 3; opacity: 0;" disabled>
-          {% if auth['profile_image_url'] is none %}
-            <img
-              src=""
-              style="font-size: 128px; text-align: center;"
-              alt='{% for i in range(auth.profile_image_url.split(" ")|length)[:2] %}{{auth.profile_image_url.split(" ")[i][0]}}{% endfor %}'
-            >
-          {% else %}
-            <img
-            src="{{ auth['profile_image_url'] }}"
-            style="font-size: 128px; text-align: center;"
-            alt='{% for i in range(auth.profile_image_url.split(" ")|length)[:2] %}{{ auth.profile_image_url.split(" ")[i][0] }}{% endfor %}'
-            >
-          {% endif %}
-          <div class="upload-overlay">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<main class="m-auto w-full max-w-5xl flex flex-col p-2 md:p-4 lg:p-8">
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <h1 class="text-lg md:text-xl lg:text-2xl mb-2 font-bold">Welcome back, {{ auth['username'] }}</h1>
+
+    <form action="/scrape-letterboxd">
+      <button class="text-sm mb-2 p-2 md:px-4">Scrap Letterboxd</button>
+    </form>
+  </div>
+  
+  <form method="POST" action="/profile" enctype="multipart/form-data" autocomplete="off" class="!max-w-5xl w-full p-4 rounded-lg bg-black/20 flex flex-col md:flex-row gap-4">
+    <!-- PROFILE PICTURE -->
+    <div class="flex flex-col gap-2 max-w-64 w-full">
+      <label for="pfp" class="relative aspect-square w-full max-size-64 rounded-xl bg-white/10 border-dashed border-4 border-white peer">
+        <input disabled type="file" id="pfp" name="pfp" ="image/*" class="w-full aspect-square z-[3] opacity-0 peer">
+        {% if auth['profile_image_url'] == '' %}
+          <img
+            src=""
+            class="w-full aspect-square text-9xl absolute top-0 left-0 opacity-50 rounded-lg"
+            alt='{% for i in range(auth.profile_image_url.split(" ")|length)[:2] %}{{auth.profile_image_url.split(" ")[i][0]}}{% endfor %}'
+          >
+          <div class="space-y-2 w-full absolute top-0 left-0 peer-disabled:opacity-50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="max-h-[192px] w-full h-full aspect-square flex-1 shrink-0" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 13v8"/>
               <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
               <path d="m8 17 4-4 4 4"/>
             </svg>
-  
-            <p>Upload</p>
+            <p class="w-full text-center text-xl">Upload</p>
           </div>
-        </label>
-        {% if auth['profile_image_url'] is not none %}
-          <button style="width: 100%; background-color: var(--destructive);" type="button" onclick="handleDeleteImage()">Delete Image</button>
+        {% else %}
+          <img
+          src="{{ auth['profile_image_url'] }}"
+          class="w-full aspect-square text-9xl absolute top-0 left-0 rounded-lg"
+          alt='{% for i in range(auth.profile_image_url.split(" ")|length)[:2] %}{{ auth.profile_image_url.split(" ")[i][0] }}{% endfor %}'
+          >
         {% endif %}
-      </div>
-      
-      <div class="profile-form">
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 2rem;">
-          <!-- CANCEL EDITS BUTTON -->
-          <button class="edit-profile cancel" type="button" disabled onclick="cancelEdits()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="m15 9-6 6"/>
-              <path d="m9 9 6 6"/>
-            </svg>
-          </button>
-
-          <!-- EDIT BUTTON -->
-          <button class="edit-profile" type="button" data-editing="true" onclick="handleToggleEdit()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
-              <path d="m15 5 4 4"/>
-            </svg>
-          </button>
-        </div>
-
-        <div class="input-container">
-          <label for="email">Email <span>*</span></label>
-          <input type="email" id="email" name="email" autocomplete="email" disabled value="{{ auth.email }}" placeholder="Please Enter Your Email" style="border-bottom: 1px solid gray;">
-        </div>
-        
-        <div class="input-container">
-          <label for="username">Username <span>*</span></label>
-          <input type="text" id="username" name="username" autocomplete="username" disabled value="{{ auth.username }}" placeholder="Please Enter Your Username" style="border-bottom: 1px solid gray;">
-        </div>
-    
-        <div class="input-container">
-          <label for="letterboxd">Letterboxd Username <span>*</span></label>
-          <input type="text" id="letterboxd" name="letterboxd" autocomplete="username" disabled value="{{ auth.letterboxd_username }}" placeholder="Please Enter Your Letterboxd Username" style="border-bottom: 1px solid gray;">
-        </div>
-
-        <form method="DELETE" action="/profile">
-          <button class="save-changes" style="margin-top: auto" type="submit" onclick="(e) => console.log(e.target.parentNode)">Save Changes</button>
-        </form>
-
-        <form method="POST" action="/scrape-letterboxd">
-          <button type="submit" class="refresh-ratings" style="margin-top: 1rem; background-color: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 5px;">
-            Refresh Ratings
-          </button>
-        </form>
-
-        <!-- Logout Button -->
-        <form method="POST" action="/logout" style="margin-bottom: 1rem;">
-          <button type="submit" style="background-color: var(--destructive); color: white; padding: 0.5rem 1rem; border: none; border-radius: 5px;">
-            Logout
-          </button>
-        </form>
-      </div>
+      </label>
+      {% if auth['profile_image_url'] != '' %}
+        <button class="w-full bg-destructive hover:bg-destructive/90 peer-has-[input:disabled]:hidden" onclick="deleteProfilePicture()">Delete Profile Picture</button>
+      {% endif %}
     </div>
 
+    <!-- OTHER FIELDS -->
+    <div class="flex flex-col gap-2 text-sm w-full">
+      <button class="ml-auto flex items-center gap-2 edit-button peer p-2 md:px-4" type="button" onclick="enableEditMode()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        <span class="hidden md:flex">Edit Profile</span>
+      </button>
+
+      <div class="input-container">
+        <label for="email" class="text-white">Email <span>*</span></label>
+        <input 
+          type="email"
+          id="email"
+          name="email"
+          autocomplete="email"
+          value="{{ auth.email }}"
+          placeholder="Please Enter Your Email"
+          class="border-b-[1px] disabled:!border-gray-400 bg-transparent"
+          disabled
+        >
+      </div>
+      
+      <div class="input-container">
+        <label for="username" class="text-white">Username <span>*</span></label>
+        <input 
+          type="text"
+          id="username"
+          name="username"
+          autocomplete="username"
+          value="{{ auth.username }}"
+          placeholder="Please Enter Your Username"
+          class="border-b-[1px] disabled:!border-gray-400 bg-transparent"
+          disabled
+        >
+      </div>
+  
+      <div class="input-container">
+        <label for="letterboxd" class="text-white">Letterboxd Username <span>*</span></label>
+        <input 
+          type="text"
+          id="letterboxd"
+          name="letterboxd"
+          autocomplete="username"
+          value="{{ auth.letterboxd_username }}"
+          placeholder="Please Enter Your Letterboxd Username"
+          class="border-b-[1px] disabled:!border-gray-400 bg-transparent"
+          disabled
+        >
+      </div>
+
+      <div class="flex items-center justify-between gap-2 mt-4 opacity-0 pointer-events-none peer-[&.opacity-0]:mt-auto peer-[&.opacity-0]:opacity-100 peer-[&.opacity-0]:pointer-events-auto">
+        <button class="flex items-center gap-2 p-2 md:px-4 cancel-button bg-destructive hover:bg-destructive/90" type="button" onclick="discardChanges()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="m15 9-6 6"/>
+            <path d="m9 9 6 6"/>
+          </svg>
+          <span class="hidden md:block">Discard Changes</span>
+        </button>
+
+        <button class="flex items-center gap-2 p-2 md:px-4" type="submit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+            <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/>
+            <path d="M7 3v4a1 1 0 0 0 1 1h7"/>
+          </svg>
+          <span class="hidden md:block">Save Changes</span>
+        </button>
+      </div>
+    </div>
   </form>
 </main>
 <script>
@@ -103,20 +126,34 @@
     profile_image_id: '{{ auth.profile_image_id }}'
   };
 
-  const pfpPreview = document.querySelector('.img-upload > img');
+  const pfpPreview = document.querySelector('form>div>label>img');
   const imageInput = document.querySelector('#pfp');
+  const inputs = document.querySelectorAll('input');
+  const editBtn = document.querySelector('button.edit-button');
 
-  function cancelEdits() {
+  async function enableEditMode() {
+    editBtn.classList.add('opacity-0','pointer-events-none');
+    inputs.forEach((el) => {
+      el.disabled = !el.disabled;
+    });
+  }
+
+  function discardChanges() {
     document.querySelector('#email').value = data.email;
     document.querySelector('#username').value = data.username;
     document.querySelector('#letterboxd').value = data.letterboxd;
     imageInput.value = '';
 
-    handleToggleEdit();
+    inputs.forEach((el) => {
+      el.disabled = !el.disabled;
+    });
+
+    const editBtn = document.querySelector('button.edit-button');
+    editBtn.classList.remove('opacity-0','pointer-events-none');
   }
 
   function toggleLoading() {
-    const buttons = document.querySelectorAll('form.auth-card button')
+    const buttons = document.querySelectorAll('button');
     const inputs = document.querySelectorAll('input');
     inputs.forEach((el) => {
       el.disabled = !el.disabled;
@@ -124,30 +161,6 @@
     buttons.forEach((el) => {
       el.disabled = !el.disabled;
     });
-  }
-
-  async function handleToggleEdit() {
-    const inputs = document.querySelectorAll('input');
-
-    const editBtn = document.querySelectorAll("button.edit-profile");
-    const isEditing = editBtn[1].dataset.editing === "true";
-    
-    if (editBtn.length > 1) {
-      const isEditing = editBtn[1].dataset.editing === "true";
-      editBtn[1].dataset.editing = !isEditing;
-      editBtn[0].disabled = !isEditing;
-    }
-
-    inputs.forEach((el) => {
-      el.disabled = !isEditing;
-      el.style.borderBottom = isEditing ? '1px solid var(--primary)' : '1px solid gray';
-    });
-
-    if (imageInput && imageInput.files.length > 0 && isEditing) {
-      pfpPreview.setAttribute('src', await getSrcFromImage(imageInput.files[0]));
-    } else {
-      pfpPreview.setAttribute('src', data.profile_image_url);
-    }
   }
 
   function getSrcFromImage(file) {
@@ -159,7 +172,7 @@
     });
   }
 
-  async function handleDeleteImage() {
+  async function deleteProfilePicture() {
     toggleLoading()
     
     const req = await fetch('/profile', { method: 'DELETE' });
