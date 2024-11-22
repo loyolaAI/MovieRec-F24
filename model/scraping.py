@@ -79,6 +79,47 @@ def scrape_letterboxd(username: str) -> dict:
     # Return the users letterboxd data as a dictionary
     return user_data_dict
 
+def scrape_letterboxd_picture(movie_slug: str):
+    """
+    Scrapes the poster image URL for a specific movie from Letterboxd using its slug.
+
+    Args:
+    - movie_slug: The slug part of the movie URL on Letterboxd (e.g., 'joker-folie-a-deux' for 'letterboxd.com/film/joker-folie-a-deux/')
+
+    Returns:
+    - Poster image URL for the movie.
+    """
+    url = f"https://letterboxd.com/film/{movie_slug}/"
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        raise Exception(f"Failed to retrieve data. Status code: {response.status_code}")
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # Extract JSON-LD data which contains movie details
+    script_data = soup.select_one('script[type="application/ld+json"]')
+    if not script_data:
+        raise ValueError("Movie data not found on the page.")
+
+    # Get the content of the script and strip the CDATA tags
+    raw_data = script_data.string
+    cleaned_data = re.sub(r"/\* <!\[CDATA\[ \*/|/\* \]\]> \*/", "", raw_data).strip()
+
+    # Parse JSON data
+    try:
+        movie_data = json.loads(cleaned_data)
+    except json.JSONDecodeError as e:
+        print("Error decoding JSON:", str(e))
+        return None
+
+    # Make the soup object to scrap the websites html
+    film_soup = BeautifulSoup(requests.get(url).text, "html.parser")
+    image_script_data = film_soup.select_one('script[type="application/ld+json"]')
+    json_data = json.loads(image_script_data.text.split(" */")[1].split("/* ]]>")[0])
+    poster_url = json_data.get("image", "")
+
+    return poster_url
 
 def scrape_letterboxd_movie(movie_slug: str):
     """
