@@ -43,6 +43,18 @@
     </div>
   </section>
 
+  <h2 class="text-xl font-bold mt-8">Similar Movies</h2>
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for rec in recommendations %}
+          <a href="/movie/{{ rec['film_id'] }}">
+              <div class="bg-black/10 p-4 rounded-lg shadow-lg">
+                  <img src="{{ rec['poster'] }}" alt="{{ rec['film_id'] }}" class="rounded-lg w-full h-auto mb-4">
+                  <p class="text-white">{{ rec['film_id'] }}</p>
+              </div>
+          </a>
+      {% endfor %}
+  </section>
+
   <h2 class="text-xl font-bold mt-8">Reviews</h2>
   <section class="bg-black/10 p-4 md:p-8 rounded-lg flex flex-col gap-4 shadow-lg">
     {% if movie.reviews %}

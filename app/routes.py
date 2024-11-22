@@ -8,7 +8,9 @@ from model.scraping import (
     scrape_letterboxd,
     scrape_recommended_movies,
     search_movies_from_csv,
+    scrape_letterboxd_picture,
 )
+import model
 from model.main import get_recommendations
 import csv
 from math import ceil
@@ -69,7 +71,16 @@ def init_routes(app):
             return not_found("Movie not found")
 
         movie = scrape_letterboxd_movie(movie_id)
-        return render_template("movie_info.html", movie=movie)
+        # recommend similar movies
+        recommendations = model.fast_content_based_model.get_recommendations(movie["title"])
+        print(recommendations)
+
+        # Get the movie poster for the recommendations and pass it to the frontend
+        for recommendation in recommendations:
+            recommendation["poster"] = scrape_letterboxd_picture(recommendation["film_id"])
+            print(recommendation["poster"])
+
+        return render_template("movie_info.html", movie=movie, recommendations=recommendations)
 
     @app.route("/discover", methods=["GET", "POST"])
     def discover():
