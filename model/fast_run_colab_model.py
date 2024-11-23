@@ -1,8 +1,10 @@
 import pandas as pd
 import random
 import heapq
+
 # from model.build_colab_model import build_colab_model  # Comment if running locally
-from build_colab_model import build_colab_model # Uncomment if running locally
+from build_colab_model import build_colab_model  # Uncomment if running locally
+
 
 def get_top_recs(predictions, num_recs):
     """
@@ -20,10 +22,11 @@ def get_top_recs(predictions, num_recs):
     # Use heapq to find the top N recommendations more efficiently
     return heapq.nlargest(num_recs, top_n, key=lambda x: (x[1], random.random()))
 
+
 def run_colab_model(algo, df, user_name, accuracy, num_recs=10, obscureness=5):
     """
     Run the collaborative-based model to get movie recommendations for a user.
-    
+
     Parameters:
     algo (object): The collaborative-based model object.
     df (DataFrame): The DataFrame containing the user ratings data.
@@ -31,7 +34,7 @@ def run_colab_model(algo, df, user_name, accuracy, num_recs=10, obscureness=5):
     accuracy (float): The accuracy of the model.
     num_recs (int): The number of recommendations to return.
     obscureness (int): The level of obscureness for the recommendations.
-    
+
     Returns:
     list: A list of dictionaries containing the film_id, predicted_rating, and unclipped_rating.
     """
@@ -46,7 +49,7 @@ def run_colab_model(algo, df, user_name, accuracy, num_recs=10, obscureness=5):
     # Create a review count DataFrame
     review_count_df = df["film_id"].value_counts().reset_index()
     review_count_df.columns = ["film_id", "review_count"]
-    
+
     # Filter movies by review count and obscureness threshold
     review_count_df = review_count_df[review_count_df["review_count"] <= rating_threshold]
 
@@ -76,6 +79,7 @@ def run_colab_model(algo, df, user_name, accuracy, num_recs=10, obscureness=5):
     res.sort(key=lambda x: x["unclipped_rating"], reverse=True)
 
     return res
+
 
 # Sample use case
 if __name__ == "__main__":

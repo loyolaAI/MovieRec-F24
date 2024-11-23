@@ -6,6 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 file_path = "model/data/movies.csv"
 # file_path = "./data/movies.csv"
 
+
 def load_data(file_path):
     """
     Load the dataset from a CSV file.

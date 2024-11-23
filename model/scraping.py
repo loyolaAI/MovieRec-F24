@@ -11,10 +11,10 @@ import json
 def scrape_letterboxd(username: str) -> dict:
     """
     Scrape the movies and ratings from a Letterboxd user profile.
-    
+
     Args:
     - username: The Letterboxd username to scrape movie data
-    
+
     Returns:
     - Dictionary containing movie names, slugs, ratings, and images for the given user
     """
@@ -88,6 +88,7 @@ def scrape_letterboxd(username: str) -> dict:
     # Return the users letterboxd data as a dictionary
     return user_data_dict
 
+
 def scrape_letterboxd_picture(movie_slug: str):
     """
     Scrapes the poster image URL for a specific movie from Letterboxd using its slug.
@@ -129,6 +130,7 @@ def scrape_letterboxd_picture(movie_slug: str):
     poster_url = json_data.get("image", "")
 
     return poster_url
+
 
 def scrape_letterboxd_movie(movie_slug: str):
     """
@@ -238,7 +240,7 @@ def scrape_letterboxd_movie(movie_slug: str):
     }
 
 
-def search_movies_from_csv(query): # write the comments for the function
+def search_movies_from_csv(query):  # write the comments for the function
     """
     Search for movies in the dataset based on a query string.
 

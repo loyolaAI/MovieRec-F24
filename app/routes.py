@@ -84,21 +84,21 @@ def init_routes(app):
         # print(e)
         # print("movie_id:", movie_id)
         # return render_template("error.html", error=e)
-    
+
     @app.route("/recommend/<movie_id>", methods=["GET"])
     def generate_recommendations(movie_id):
         movie = Movie.get_by_id(movie_id)
-        
+
         if movie is None:
             return not_found("Movie not found")
-        
+
         try:
             recommendations = fast_content_based_model.get_recommendations(movie["title"])
-            
+
             # Fetch posters for each recommendation
             for recommendation in recommendations:
                 recommendation["poster"] = scrape_letterboxd_picture(recommendation["film_id"])
-            
+
             return jsonify({"status": "success", "recommendations": recommendations})
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)})
