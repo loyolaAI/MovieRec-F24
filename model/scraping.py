@@ -9,6 +9,15 @@ import json
 
 
 def scrape_letterboxd(username: str) -> dict:
+    """
+    Scrape the movies and ratings from a Letterboxd user profile.
+    
+    Args:
+    - username: The Letterboxd username to scrape movie data
+    
+    Returns:
+    - Dictionary containing movie names, slugs, ratings, and images for the given user
+    """
     # Define the return dictionary
     user_data_dict = {"names": [], "slugs": [], "ratings": [], "images": []}
     # Define the regex patterns for name, slug, and rating which will
@@ -229,13 +238,31 @@ def scrape_letterboxd_movie(movie_slug: str):
     }
 
 
-def search_movies_from_csv(query):
+def search_movies_from_csv(query): # write the comments for the function
+    """
+    Search for movies in the dataset based on a query string.
+
+    Args:
+    - query: The search query string to match against movie titles.
+
+    Returns:
+    - List of dictionaries containing movie details for each matching movie.
+    """
     df = pd.read_csv("model/data/movies.csv")
     filtered = df[df["movie_title"].str.contains(query, case=False, na=False)]
     return filtered.to_dict("records")
 
 
 def scrape_recommended_movies(movie_slugs):
+    """
+    Scrape details of recommended movies from Letterboxd using their slugs.
+
+    Args:
+    - movie_slugs: List of movie slugs to scrape details for.
+
+    Returns:
+    - List of dictionaries containing movie details for each recommended movie.
+    """
     movie_data = []  # List to hold data for each recommended movie
 
     for movie_slug in movie_slugs:
@@ -279,6 +306,15 @@ def scrape_recommended_movies(movie_slugs):
 
 # Method to scrape a given letterboxd username and return a dataframe with the movie names and the star ratings.
 def scrape_and_make_dataframe(username: str) -> pd.DataFrame:
+    """
+    Scrape the movies and ratings from a Letterboxd user profile and return a Pandas DataFrame.
+
+    Args:
+    - username: The Letterboxd username to scrape movie data
+
+    Returns:
+    - Pandas DataFrame containing movie names, ratings, and images for the given user
+    """
     # Scrape the movies and ratings from the given letterboxd username
     user_data_dict = scrape_letterboxd(username)
 

@@ -5,12 +5,37 @@ import heapq
 from build_colab_model import build_colab_model # Uncomment if running locally
 
 def get_top_recs(predictions, num_recs):
+    """
+    Get the top N recommendations from the predictions.
+
+    Parameters:
+    predictions (list): A list of predictions from the collaborative-based model.
+    num_recs (int): The number of recommendations to return.
+
+    Returns:
+    list: A list of tuples containing the movie name and the predicted rating.
+    """
     # top_n is a list of tuples that has the movie name and the predicted rating
     top_n = [(iid, est) for _, iid, _, est, _ in predictions]
     # Use heapq to find the top N recommendations more efficiently
     return heapq.nlargest(num_recs, top_n, key=lambda x: (x[1], random.random()))
 
 def run_colab_model(algo, df, user_name, accuracy, num_recs=10, obscureness=5):
+    """
+    Run the collaborative-based model to get movie recommendations for a user.
+    
+    Parameters:
+    algo (object): The collaborative-based model object.
+    df (DataFrame): The DataFrame containing the user ratings data.
+    user_name (str): The user name for which to get recommendations.
+    accuracy (float): The accuracy of the model.
+    num_recs (int): The number of recommendations to return.
+    obscureness (int): The level of obscureness for the recommendations.
+    
+    Returns:
+    list: A list of dictionaries containing the film_id, predicted_rating, and unclipped_rating.
+    """
+
     # Filter out movies the user has already rated
     rated_movies = df[df["user_name"] == user_name]["film_id"].tolist()
 
@@ -55,7 +80,7 @@ def run_colab_model(algo, df, user_name, accuracy, num_recs=10, obscureness=5):
 # Sample use case
 if __name__ == "__main__":
     # Define accuracy to something small, since this is a just a sample use case
-    accuracy = 0.05
+    accuracy = 0.2
 
     # Load sample user ratings data (limit for faster testing)
     size_of_all_users_ratings = 1459852

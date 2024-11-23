@@ -51,10 +51,21 @@ def ensure_movie_in_dataset(movie_title, movies):
         movies = pd.concat([movies, placeholder], ignore_index=True)
     return movies
 
-def get_recommendations(title, movies, tfidf_matrix, top_n=5):
+def get_recommendations(title, movies=None, tfidf_matrix=None, top_n=10):
     """
     Get top N movie recommendations based on the cosine similarity of the TF-IDF matrix.
+
+    Parameters:
+    title (str): The movie title for which to get recommendations.
+    movies (DataFrame): The preprocessed movie DataFrame.
+    tfidf_matrix (sparse matrix): The TF-IDF matrix.
+    top_n (int): The number of recommendations to return.
     """
+    if movies is None or tfidf_matrix is None:
+        movies = load_data(file_path)
+        movies = preprocess_data(movies)
+        tfidf, tfidf_matrix = create_tfidf_matrix(movies)
+
     try:
         idx = movies.index[movies["movie_title"] == title][0]
     except IndexError:
@@ -65,9 +76,9 @@ def get_recommendations(title, movies, tfidf_matrix, top_n=5):
     
     # Get top N most similar movies (excluding the movie itself)
     related_docs_indices = cosine_similarities.argsort()[:-top_n-2:-1]  # Skip the self-match
-    recommendations = movies.iloc[related_docs_indices]["film_id"]
+    recommendations = movies.iloc[related_docs_indices][["film_id", "movie_title"]]
     
-    return recommendations
+    return recommendations.to_dict(orient="records")
 
 def get_movie_recommendations(movie_title, file_path="model/data/movies.csv", top_n=5):
     # Load the dataset
@@ -89,8 +100,9 @@ def get_movie_recommendations(movie_title, file_path="model/data/movies.csv", to
     except ValueError as e:
         return str(e)
     
-movie_title = "Aha"
-recommendations = get_movie_recommendations(movie_title)
-print(f"Top 5 recommendations for '{movie_title}':")
-for film_id in recommendations:
-    print(film_id)
+# TESTING
+# movie_title = "Aha"
+# recommendations = get_movie_recommendations(movie_title)
+# print(f"Top 5 recommendations for '{movie_title}':")
+# for film_id in recommendations:
+#     print(film_id)
