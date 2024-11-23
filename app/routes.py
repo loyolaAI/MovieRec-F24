@@ -3,12 +3,15 @@ from flask_login import login_required, current_user, login_user, logout_user  #
 from werkzeug.security import check_password_hash
 from datetime import datetime, timezone
 import requests
+from model import fast_content_based_model
 from model.scraping import (
     scrape_letterboxd_movie,
     scrape_letterboxd,
     scrape_recommended_movies,
     search_movies_from_csv,
+    scrape_letterboxd_picture,
 )
+import model
 from model.main import get_recommendations
 import csv
 from math import ceil
@@ -56,7 +59,7 @@ def init_routes(app):
         return jsonify({"recommendations": recommendation.tolist()})
 
     # Fetch Movie Data
-    @app.route("/movie/<movie_id>", methods=["GET"])
+    @app.route("/movie_info/<movie_id>", methods=["GET"])
     def movie(movie_id):
         movie = Movie.get_by_id(movie_id)
 
@@ -69,7 +72,36 @@ def init_routes(app):
             return not_found("Movie not found")
 
         movie = scrape_letterboxd_movie(movie_id)
-        return render_template("movie_info.html", movie=movie)
+        # recommend similar movies
+        recommendations = fast_content_based_model.get_recommendations(movie["title"])
+
+        # Get the movie poster for the recommendations and pass it to the frontend
+        for recommendation in recommendations:
+            recommendation["poster"] = scrape_letterboxd_picture(recommendation["film_id"])
+
+        return render_template("movie_info.html", movie=movie, recommendations=recommendations)
+        # except Exception as e:
+        # print(e)
+        # print("movie_id:", movie_id)
+        # return render_template("error.html", error=e)
+
+    @app.route("/recommend/<movie_id>", methods=["GET"])
+    def generate_recommendations(movie_id):
+        movie = Movie.get_by_id(movie_id)
+
+        if movie is None:
+            return not_found("Movie not found")
+
+        try:
+            recommendations = fast_content_based_model.get_recommendations(movie["title"])
+
+            # Fetch posters for each recommendation
+            for recommendation in recommendations:
+                recommendation["poster"] = scrape_letterboxd_picture(recommendation["film_id"])
+
+            return jsonify({"status": "success", "recommendations": recommendations})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)})
 
     @app.route("/discover", methods=["GET", "POST"])
     def discover():
@@ -145,6 +177,10 @@ def init_routes(app):
     @app.route("/recent", methods=["GET"])
     def recent():
         return render_template("recent.html", movies=User.get_rated_movies(current_user))
+
+    @app.route("/get_movie_picture/<movie_id>", methods=["GET"])
+    def get_movie_picture(movie_id):
+        return scrape_letterboxd_picture(movie_id)
 
     @app.route("/movie_info/<movie_id>", methods=["GET"])
     def movie_info(movie_id):

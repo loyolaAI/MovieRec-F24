@@ -3,11 +3,15 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+file_path = "model/data/movies.csv"
+# file_path = "./data/movies.csv"
 
-def load_data(file_path="./data/movies.csv.gz"):
+
+def load_data(file_path):
     """
     Load the dataset from a CSV file.
     """
+
     # TODO might not be working
     if file_path.split(".")[-1] == ".gz":
         movies = pd.read_csv(file_path, compression="gzip")
@@ -20,12 +24,26 @@ def preprocess_data(movies: pd.DataFrame):
     """
     Combine genres, director, actors, and writes into a single feature for each movie.
     """
+
     # TODO
     # something like
     # movies['combined_features'] = movies['genres'] + ' ' + movies['director']
     # ect...
     # Note. you should parse movies['genres'] using something like .split("|") because the format is
     # genre1 | genre2 | ... and we want just spaces no vertical bars
+
+    rows = 50000
+    # Replace vertical bars with spaces in 'genres'
+    movies["genres"] = movies["genres"].fillna("").astype(str)
+    movies["genres"] = movies["genres"].apply(
+        lambda x: x.replace("[", "").replace("]", "").replace('"', "").replace(",", "|")
+    )
+    # .apply(lambda x: x.replace('|', ' '))
+
+    # Combine relevant columns into a single feature
+    movies["combined_features"] = movies.apply(lambda row: f"{row['genres']}", axis=1)
+    movies = movies.iloc[:rows]
+    print(movies)
     return movies
 
 
@@ -53,12 +71,12 @@ def get_recommendations(title, movies, cosine_sim):
     Get the top 5 movie recommendations based on the title.
     """
     # TODO probably not working.
-    idx = movies[movies["title"] == title].index[0]
+    idx = movies[movies["movie_title"] == title].index[0]
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     sim_scores = sim_scores[1:6]  # Skip the first one (self match)
     movie_indices = [i[0] for i in sim_scores]
-    return movies["title"].iloc[movie_indices]
+    return movies["movie_title"].iloc[movie_indices]
 
 
 # The methods below were written by chatGPT and will be used for a later implementation
@@ -102,8 +120,9 @@ def get_recommendations_for_user(user_movies, movies, cosine_sim, top_n=5):
 # Main workflow
 if __name__ == "__main__":
     # Load the data
-    movie_data_file = "./data/movies.csv.gz"  # Path to your dataset
-    movies = load_data(movie_data_file)
+    # movie_data_file = "./data/movies.csv.gz"  # Path to your dataset
+    # file_path="model/data/movies.csv"
+    movies = load_data(file_path)
 
     # Preprocess the data
     movies = preprocess_data(movies)

@@ -82,7 +82,7 @@
             const posterElement = card.querySelector('.movie-poster');
 
             // Fetch movie details (e.g., image and clickable link)
-            fetch(`/movie_details/${filmId}`)
+            fetch(`/get_movie_picture/${filmId}`)
                 .then(response => response.json())
                 .then(data => {
                     posterElement.src = data.poster_url;
