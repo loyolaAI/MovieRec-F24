@@ -178,6 +178,10 @@ def init_routes(app):
     def recent():
         return render_template("recent.html", movies=User.get_rated_movies(current_user))
 
+    @app.route("/get_movie_picture/<movie_id>", methods=["GET"])
+    def get_movie_picture(movie_id):
+        return scrape_letterboxd_picture(movie_id)
+
     @app.route("/movie_info/<movie_id>", methods=["GET"])
     def movie_info(movie_id):
         try:
