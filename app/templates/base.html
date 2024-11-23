@@ -69,6 +69,13 @@
         /* ============ AUTH ============ */
       }
     </style>
+    <!-- center everything and add background -->
+    <style>
+      body {
+        background: url("{{ url_for('static', filename='background.svg') }}") no-repeat center center fixed;
+        background-size: cover;
+      }
+    </style> 
 </head>
 <body class="min-h-[100vh] flex">
   {% if auth['is_authenticated'] %}
