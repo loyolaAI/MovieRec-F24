@@ -9,19 +9,33 @@ def get_movie_info(user_data: pd.DataFrame) -> pd.DataFrame:
     dataframe and search for the same title within the films.csv.gz and then get the technical
     name, instead of just the slug.
     """
-    # load the film metadata 
+    # load the film metadata
     movies_df = pd.read_csv("./data/movies.csv")
 
     # merge with user data based on the 'movie_name_slug column'
-    #movie_info = pd.merge(user_data, movies_df, left_on="film_id", right_on="film_id", how="left")
-    movie_info = pd.merge(user_data, movies_df[['film_id', 'movie_title', 'genres', 'rating_count', 'original_language', 'year_released']], on="film_id", how="left")
+    # movie_info = pd.merge(user_data, movies_df, left_on="film_id", right_on="film_id", how="left")
+    movie_info = pd.merge(
+        user_data,
+        movies_df[
+            [
+                "film_id",
+                "movie_title",
+                "genres",
+                "rating_count",
+                "original_language",
+                "year_released",
+            ]
+        ],
+        on="film_id",
+        how="left",
+    )
 
-    movie_info['film_id'] = movie_info['film_id'].fillna('0')
-    movie_info['rating_count'] = movie_info['rating_count'].fillna('Unknown')
-    movie_info['genres'] = movie_info['genres'].fillna('Unknown')
-    movie_info['movie_title'] = movie_info['movie_title'].fillna('Unknown')
-    movie_info['original_language'] = movie_info['original_language'].fillna('Unknown')
-    movie_info['year_released'] = movie_info['year_released'].fillna('Unknown')
+    movie_info["film_id"] = movie_info["film_id"].fillna("0")
+    movie_info["rating_count"] = movie_info["rating_count"].fillna("Unknown")
+    movie_info["genres"] = movie_info["genres"].fillna("Unknown")
+    movie_info["movie_title"] = movie_info["movie_title"].fillna("Unknown")
+    movie_info["original_language"] = movie_info["original_language"].fillna("Unknown")
+    movie_info["year_released"] = movie_info["year_released"].fillna("Unknown")
 
     return movie_info
 
