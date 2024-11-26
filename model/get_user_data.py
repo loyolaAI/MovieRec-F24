@@ -9,7 +9,21 @@ def get_movie_info(user_data: pd.DataFrame) -> pd.DataFrame:
     dataframe and search for the same title within the films.csv.gz and then get the technical
     name, instead of just the slug.
     """
-    print("hello from get_movie_info")
+    # load the film metadata 
+    movies_df = pd.read_csv("./data/movies.csv")
+
+    # merge with user data based on the 'movie_name_slug column'
+    #movie_info = pd.merge(user_data, movies_df, left_on="film_id", right_on="film_id", how="left")
+    movie_info = pd.merge(user_data, movies_df[['film_id', 'movie_title', 'genres', 'rating_count', 'original_language', 'year_released']], on="film_id", how="left")
+
+    movie_info['film_id'] = movie_info['film_id'].fillna('0')
+    movie_info['rating_count'] = movie_info['rating_count'].fillna('Unknown')
+    movie_info['genres'] = movie_info['genres'].fillna('Unknown')
+    movie_info['movie_title'] = movie_info['movie_title'].fillna('Unknown')
+    movie_info['original_language'] = movie_info['original_language'].fillna('Unknown')
+    movie_info['year_released'] = movie_info['year_released'].fillna('Unknown')
+
+    return movie_info
 
 
 def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame, accuracy: float) -> list:
@@ -19,6 +33,15 @@ def get_unwatched_movies(user_data: pd.DataFrame, movies: pd.DataFrame, accuracy
     should be as simple as taking the .csv file with all the movies and getting only movies
     the user has not seen.
     """
+
+    # get all movies have watched
+    watched_movies = user_data['film_id'].tolist()
+
+    # Filter out movies that have already been watched
+    unwatched_movies = movies[~movies['film_id'].isin(watched_movies)]
+
+    # Return the list
+    return unwatched_movies['film_id'].tolist()
 
 
 def get_movie_dataframe(accuracy: float) -> pd.DataFrame:
@@ -65,3 +88,9 @@ def get_movie_dataframe(accuracy: float) -> pd.DataFrame:
     # Concatenate all the chunks into a single DataFrame
     df = pd.concat(dfs, ignore_index=True)
     return df
+
+if __name__ == "__main__":
+    user_data = pd.read_csv('./data/sample_user_data.csv')
+    movie_info = get_movie_info(user_data)
+    print(movie_info["genres"])
+    print(movie_info.head())
