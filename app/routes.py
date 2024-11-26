@@ -1,13 +1,39 @@
-from flask import request, jsonify, render_template, redirect, url_for, flash
+from flask import request, jsonify, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user, login_user, logout_user  # type: ignore
 from werkzeug.security import check_password_hash
-from datetime import datetime
+from datetime import datetime, timezone
+import requests
+from model.scraping import (
+    scrape_letterboxd_movie,
+    scrape_letterboxd,
+    scrape_recommended_movies,
+    search_movies_from_csv,
+)
+from model.main import get_recommendations
+import csv
+from math import ceil
+
+
+# from model.main import get_recommendations
+from datetime import datetime, timezone
+import requests
+
+import sys
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+sys.path.append("..")
 
 from app.functions.movie_recommender import movie_recommendation
 from app.db_models.user import User
 from app.db_models.password_reset_token import PasswordResetToken as Pass
+from app.db_models.movie import Movie
+from app.db_models.movie_rating import MovieRating
 
 from app.functions.user_actions import (
+    scrape_user_ratings,
     create_user,
     update_password,
     send_password_reset_email,
@@ -15,14 +41,12 @@ from app.functions.user_actions import (
 )
 from app import db
 
-# from app.model.scraping import scrap_letterboxd
-
 
 def init_routes(app):
     @app.route("/")
     @login_required
     def home():
-        return render_template("index.html")
+        return render_template("index.html", movies=User.get_rated_movies(current_user))
 
     # Recommendation
     @app.route("/recommend", methods=["POST"])
@@ -32,22 +56,124 @@ def init_routes(app):
         return jsonify({"recommendations": recommendation.tolist()})
 
     # Fetch Movie Data
-    @app.route("/movie/<int:movie_id>", methods=["GET"])
-    def fetch_movie_data(movie_id):
-        # Validity Check
-        # Fetch using 'movie_data' function
-        # Throw exception if there is not movie data
-        return
+    @app.route("/movie/<movie_id>", methods=["GET"])
+    def movie(movie_id):
+        movie = Movie.get_by_id(movie_id)
 
-    # Search For Movie(s)
-    @app.route("/search", methods=["GET"])
+        if movie is None:
+            movie = requests.get("https://letterboxd.com/film/" + movie_id)
+
+        if (type(movie) == requests.models.Response and movie.status_code == 404) or (
+            type(movie) == Movie and movie is None
+        ):
+            return not_found("Movie not found")
+
+        movie = scrape_letterboxd_movie(movie_id)
+        return render_template("movie_info.html", movie=movie)
+
+    @app.route("/discover", methods=["GET", "POST"])
+    def discover():
+        # Limit for heroku
+        allowed_accuracy = 0.1
+        if os.getenv("LIMITED_MODEL") is not None and os.getenv("LIMITED_MODEL") == "True":
+            allowed_accuracy = 0.01
+
+        recommendations = []  # Initialize an empty list for recommendations
+        if request.method == "POST":
+            data = request.form
+            username = data.get("username")
+            accuracy = min(float(data.get("accuracy", 0.01)), allowed_accuracy)
+            number_recs = int(data.get("number_recs", 10))
+            obscureness = int(data.get("obscureness", 9))
+
+            # Ensure the username is provided
+            if not username:
+                return jsonify({"error": "Username is required"}), 400
+
+            try:
+                # Get recommendations and extract only the film IDs
+                recommendation_dicts = get_recommendations(
+                    username, accuracy, number_recs, obscureness
+                )
+                recommendation_slugs = [rec["film_id"] for rec in recommendation_dicts]
+
+                # Scrape data for each recommended movie using just the film_id
+                recommendations = scrape_recommended_movies(recommendation_slugs)
+
+            except Exception as e:
+                print(f"Error generating recommendations: {e}")
+                return jsonify({"error": "Failed to generate recommendations"}), 500
+
+        return render_template(
+            "discover.html", recommendations=recommendations, username=current_user.username
+        )
+
+    @app.route("/search", methods=["GET", "POST"])
     def search():
-        # Validity Check
-        # Movie Search
-        # Throw exception if there is no movie, or give similar
-        return
+        search_results = []
+        query = request.form.get("query") if request.method == "POST" else request.args.get("query")
+        page = int(request.args.get("page")) if request.args.get("page") is not None else 1
+
+        # Read movies from CSV
+        movies = []
+        with open("model/data/movies.csv", "r") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                movies.append(row)
+
+        # Filter movies if there's a search query
+        if query:
+            search_results = [
+                movie
+                for movie in movies
+                if query.lower() in movie["movie_title"].lower()
+                or query.lower() in movie["genres"].lower()
+            ]
+
+        movie_data = []
+        for movie in search_results[10 * (page - 1) : 10 * page]:
+            movie_data.append(scrape_letterboxd_movie(movie["film_id"]))
+
+        return render_template(
+            "search.html",
+            query=query,
+            search_results=movie_data,
+            total_pages=10,
+            page=1,
+        )
+
+    @app.route("/recent", methods=["GET"])
+    def recent():
+        return render_template("recent.html", movies=User.get_rated_movies(current_user))
+
+    @app.route("/movie_info/<movie_id>", methods=["GET"])
+    def movie_info(movie_id):
+        try:
+            # print("movie_id:", movie_id)
+
+            movie_data = scrape_letterboxd_movie(movie_id)
+            if not movie_data or not movie_data.get("title"):
+                return render_template("error.html", error="Movie data not found")
+            # print("Final movie data:", movie_data)
+            return render_template("movie_info.html", movie=movie_data)
+        except Exception as e:
+            print(e)
+            print("movie_id:", movie_id)
+            return render_template("error.html", error=e)
+
+    # # Fetch Movie Data
+    # @app.route("/movie/<int:movie_id>", methods=["GET"])
+    # def fetch_movie_data(movie_id):
+    #     # Validity Check
+    #     # Fetch using 'movie_data' function
+    #     # Throw exception if there is not movie data
+    #     return
 
     # ================== Authentication Related ==================
+    @app.errorhandler(404)
+    def not_found(message="Not Found"):
+        return render_template("not-found.html", message=message), 404
+
     @app.route("/profile")
     @login_required
     def profile():
@@ -76,6 +202,14 @@ def init_routes(app):
         User.get_by_email(current_user.email).delete_image()
         return jsonify({"Status": 200, "Message": "Image deleted successfully"})
 
+    @app.route("/scrape-letterboxd")
+    @login_required
+    def scrape():
+        scrape_user_ratings(current_user)
+        db.session.commit()
+
+        return redirect(url_for("home"))
+
     @app.route("/signup")
     def signup():
         return render_template("signup.html")
@@ -90,19 +224,19 @@ def init_routes(app):
         # Check if user already exists
         does_user_exist = User.get_by_email(email)
         if does_user_exist:
-            flash("Error: Email address already exists")
+            flash("Error: Email address already exists", "error")
             return redirect(url_for("signup"))
-
-        # Fetch user ratings from letterbox
-        # movie_names, movie_ratings = scrap_letterboxd(letterboxd)
 
         # Create User
         new_user = create_user(email, username, password, letterboxd)
 
+        # Scrape User Ratings, this function adds the ratings to the user object and DB
+        scrape_user_ratings(new_user)
+
         db.session.add(new_user)
         db.session.commit()
 
-        return redirect(url_for("login"))
+        return redirect("/login?email=" + email)
 
     @app.route("/login")
     def login():
@@ -117,12 +251,12 @@ def init_routes(app):
         # Check if user exists
         user = User.get_by_email(email)
         if not user:
-            flash("Error: Please check your login details and try again.")
+            flash("Error: User not found.", "error")
             return redirect(url_for("login"))
 
         # Check if password is correct
         if not check_password_hash(user.password, password):
-            flash("Error: Please check your login details and try again.")
+            flash("Error: Please check your login details and try again.", "error")
             return redirect(url_for("login"))
 
         # While we're at it, check if there are any expired reset tokens
@@ -151,7 +285,7 @@ def init_routes(app):
         # Check if user exists
         user = User.get_by_email(email)
         if user is None:
-            flash("Error: User not found.")
+            flash("Error: User not found.", "error")
             return redirect(url_for("reset_password"))
 
         reset_token = []
@@ -161,10 +295,13 @@ def init_routes(app):
         if not user.reset_token:
             reset_token.append(Pass.create_reset_token(user))
         elif user.reset_token:
-            if user.reset_token.expires_at > datetime.now():
+            current = datetime.now().replace(tzinfo=timezone.utc)
+            expires = user.reset_token.expires_at.replace(tzinfo=timezone.utc)
+
+            if expires > current:
                 Pass.delete_reset_token(user.reset_token)
                 reset_token.append(Pass.create_reset_token(user))
-            elif user.reset_token.expires_at < datetime.now():
+            elif expires < current:
                 reset_token.append(Pass.create_reset_token(user))
 
         db.session.add(reset_token[0])
@@ -183,12 +320,12 @@ def init_routes(app):
 
         # Check if token exists
         if not reset_token:
-            flash("Error: Token not found.")
+            flash("Error: Token not found.", "error")
             return redirect(url_for("reset_password"))
 
         # Check if token is expired
         if reset_token.expires_at < datetime.now():
-            flash("Error: Token has expired.")
+            flash("Error: Token has expired.", "error")
             return redirect(url_for("reset_password"))
 
         # Update user password

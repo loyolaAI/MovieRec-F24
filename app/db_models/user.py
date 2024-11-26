@@ -22,8 +22,8 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
 
-    profile_image_id: Mapped[str] = mapped_column(nullable=True)
-    profile_image_url: Mapped[str] = mapped_column(nullable=True)
+    profile_image_id: Mapped[str] = mapped_column(nullable=False, server_default="")
+    profile_image_url: Mapped[str] = mapped_column(nullable=False, server_default="")
 
     reset_token: Mapped["PasswordResetToken"] = relationship("PasswordResetToken", back_populates="user")  # type: ignore
 
@@ -67,13 +67,31 @@ class User(UserMixin, db.Model):
     def delete_image(self) -> None:
         # Configuration
         cloudinary.config(
-            cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-            api_key=os.getenv("CLOUDINARY_API_KEY"),
             api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+            api_key=os.getenv("CLOUDINARY_API_KEY"),
+            cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
             secure=True,
         )
 
         cloudinary.uploader.destroy(self.profile_image_id)
-        self.profile_image_url = None
-        self.profile_image_id = None
+        self.profile_image_url = ""
+        self.profile_image_id = ""
         db.session.commit()
+
+    def has_rated_movie(self, movie_id: str) -> bool:
+        for rating in self.ratings:
+            if rating.movie_id == movie_id:
+                return True
+        return False
+
+    def get_rating(self, movie_id: str) -> MovieRating:
+        for rating in self.ratings:
+            if rating.movie_id == movie_id:
+                return rating
+        return None
+
+    def get_rated_movies(self) -> list["MovieRating"]:
+        movies = []
+        for rating in self.ratings:
+            movies.append(rating.movie)
+        return movies

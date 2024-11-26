@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<img class="fixed top-0 left-0 h-screen blur-lg" src="{{ url_for('static', filename='background.svg') }}"/>
+<main class="z-10 m-auto flex flex-col gap-4 max-w-lg w-full">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="notification {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="p-8 rounded-2xl bg-white text-black">
+    {% block form_content %}{% endblock %}
+  </div>
+</mai>
+{% endblock %}

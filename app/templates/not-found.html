@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" class="overscroll-none">
+<head>
+  <meta charset="UTF-8">
+  <title>Movie Streaming Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <script src="{{ url_for('static', filename='scripts/icons.js') }}"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/mainPage.css') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-[100vh] flex items-center justify-center flex-col gap-4">
+  <span class="text-9xl font-bold">404</span>
+  {% if message %}
+    <span class="text-3xl text-center font-semibold text-balance">{{ message }}</span>
+  {% else %}
+    <span class="text-3xl text-center font-semibold">Not Found</span>
+  {% endif %}
+</body>

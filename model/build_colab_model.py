@@ -1,23 +1,23 @@
 import pandas as pd
 import numpy as np
 import random
+from surprise import BaselineOnly
 
-try:
-    from surprise import Dataset
-    from surprise import Reader
-    from surprise import SVD
-except ModuleNotFoundError:
-    raise Exception(
-        "You need to install the scikit-surprise library. \n"
-        "Please refer to the 'install_surprise.md' under tutorials."
-    )
-
-## Not needed for now because we don't dump anything
-# from surprise.dump import dump
-# import pickle
+from surprise import Dataset
+from surprise import Reader
 
 
-def build_colab_model(df, user_data, accuracy=0.1):
+def build_colab_model(df, user_data, model_type: str):
+    """
+    Method to build the collaborative based filtering model
+    Takes in
+    df : pd.dataframe, the dataframe of all the movies we're recommending
+    user_data : pd.dataframe, the dataframe with all the users data
+
+    returns
+    algo : the SVD algorithm
+    """
+
     # Set random seed so that returned recs are always the same for same user with same ratings
     # Not necessary, but good for testing because we want to make sure all movie recs are the
     # same between runs
@@ -33,6 +33,9 @@ def build_colab_model(df, user_data, accuracy=0.1):
     # concatenate all of the ratings with the users ratings
     df = pd.concat([df, user_data[["user_name", "film_id", "rating"]]], axis=0, ignore_index=True)
 
+    # user_data is now in the main movie df so we don't need it, i.e. delete it
+    del user_data
+
     # Load all of the data into the surprise Dataset library using the scale from
     # 1 to 10, 1 being a .5 star rating and 10 being a 5 star rating
     reader = Reader(rating_scale=(1, 10))
@@ -41,32 +44,40 @@ def build_colab_model(df, user_data, accuracy=0.1):
     # This allows it be used by SVD
     data = Dataset.load_from_df(df[["user_name", "film_id", "rating"]], reader)
 
-    # Initialize the singular value decomposition from scikit-learn surprise library.
-    algo = SVD()
+    # Load the model if a valid argument
+    if model_type.lower() == "svd":
+        # Initialize the singular value decomposition from scikit-learn surprise library.
+        from surprise import SVD
+
+        algo = SVD()
+    elif model_type.lower() == "baseline":
+        # Initialize the BaseLineOnly model from scikit-learn surprise library.
+        from surprise import BaselineOnly
+
+        algo = BaselineOnly()
+    else:
+        # You can only run the model with two types, SVD and BaseLine
+        # so if the type is invalid throw an error.
+        raise ValueError("Invalid model type. Choose 'SVD' or 'BaseLine'.")
 
     # Fit the SVD algorithm onto the combined full-dataset with the users data
     trainingSet = data.build_full_trainset()
     algo.fit(trainingSet)
 
     # Return the trained SVD algorithm
-    return algo
-
-
-## Don't need this currently, but might need it later, so i'm keeping it
-# def dump_model_into_pickle(algo):
-#     """
-#     Method that takes the trained algorithm and dumps it into a .pkl file
-#     """
-#     dump("models/initial_model.pkl", predictions=None, algo=algo, verbose=1)
+    return algo, df
 
 
 # Sample use case
 if __name__ == "__main__":
     # just using sample accuracy and user data, for proof of concept
     accuracy = 0.05
-    from get_user_data import get_movie_dataframe
-
-    df = get_movie_dataframe(accuracy)
-    user_data = pd.read_csv("./data/sample_user_data.csv")
-    algo = build_colab_model(df, user_data, accuracy)
+    size_of_all_users_ratings = 1459852
+    df = pd.read_csv(
+        "model/data/all_users_ratings.csv.gz",
+        compression="gzip",
+        nrows=int(size_of_all_users_ratings * accuracy),
+    )
+    user_data = pd.read_csv("model/data/sample_user_data.csv")
+    algo, _ = build_colab_model(df, user_data, "SVD")
     print(f"algo = {algo}")
