@@ -13,35 +13,52 @@
     <div class="text-white/50 [&_strong]:text-white space-y-2">
       <p class="text-lg font-bold text-white"><strong>{{ movie.title }}</strong></p>
       <p><strong>Rating:</strong>
-        {% set full_stars = movie.rating | int %}
-        {% set decimal_part = movie.rating - full_stars %}
-        
-        {% for _ in range(full_stars) %}
-            <span class="star">★</span>
-        {% endfor %}
-        
-        {% if decimal_part > 0 %}
-            <span class="star">☆</span> <!-- This will represent the decimal star -->
+        {% if movie.rating == 0.0 %}
+        Unrated
+        {% else %}
+          {% set full_stars = movie.rating | int %}
+          {% set decimal_part = movie.rating - full_stars %}
+          
+          {% for _ in range(full_stars) %}
+              <span class="star">★</span>
+          {% endfor %}
+          
+          {% if decimal_part > 0 %}
+              <span class="star">☆</span> <!-- This will represent the decimal star -->
+          {% endif %}
+          
+          {{ movie.rating }} / 5
         {% endif %}
-        
-        {{ movie.rating }} / 5
       </p>
       <p><strong>Year:</strong> {{ movie.year }}</p>
       <p><strong>Genres:</strong> {{ movie.genres | join(', ') }}</p>
       <p class="mb-4"><strong>Director:</strong> 
-        <a href="https://en.wikipedia.org/wiki/{{ movie.director.replace(' ', '_') }}" target="_blank" class="text-primary hover:underline">{{ movie.director }}</a>
+        <a href="https://www.imdb.com/find?q={{ movie.director | replace(' ', '+') }}" target="_blank" class="text-primary hover:underline">{{ movie.director }}</a>
       </p>
       <p><strong>Summary:</strong> {{ movie.summary }}</p>
       <br>
       <p class="mb-4">
         <strong>Actors:</strong>
         {% for actor in movie.actors[:20] %}
-          <a href="{{ actor.wiki_url }}" target="_blank" class="text-primary hover:underline">{{ actor.name }}</a>{% if not loop.last %}, {% endif %}
+        <a href="https://www.imdb.com/find?q={{ actor.name | replace(' ', '+') }}" target="_blank" class="text-primary hover:underline">{{ actor.name }}</a>{% if not loop.last %}, {% endif %}
         {% endfor %}
       </p>
         
     </div>
   </section>
+
+  <h2 class="text-xl font-bold mt-8">Similar Movies</h2>
+  <section class="flex overflow-x-auto gap-4 py-4">
+    {% for rec in recommendations %}
+        <a href="{{ url_for('movie_info', movie_id=rec['film_id']) }}" class="flex-shrink-0">
+            <div class="bg-black/10 p-4 rounded-lg shadow-lg">
+                <img src="{{ rec['poster'] }}" alt="{{ rec['film_id'] }}" class="rounded-lg w-full h-auto mb-4">
+                <p class="text-white">{{ rec[''] }}</p>
+            </div>
+        </a>
+    {% endfor %}
+  </section>
+
 
   <h2 class="text-xl font-bold mt-8">Reviews</h2>
   <section class="bg-black/10 p-4 md:p-8 rounded-lg flex flex-col gap-4 shadow-lg">
